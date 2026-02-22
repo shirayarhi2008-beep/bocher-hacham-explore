@@ -5,8 +5,10 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { FavoritesProvider } from "@/contexts/FavoritesContext";
 import AppLayout from "@/components/layout/AppLayout";
+import HomePage from "./pages/HomePage";
 import PeoplePage from "./pages/PeoplePage";
 import ListsPage from "./pages/ListsPage";
+import PartyDetailPage from "./pages/PartyDetailPage";
 import ExplorePage from "./pages/ExplorePage";
 import CategoryDetailPage from "./pages/CategoryDetailPage";
 import NotFound from "./pages/NotFound";
@@ -22,8 +24,10 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route element={<AppLayout />}>
-              <Route path="/" element={<PeoplePage />} />
+              <Route path="/" element={<HomePage />} />
+              <Route path="/people" element={<PeoplePage />} />
               <Route path="/lists" element={<ListsPage />} />
+              <Route path="/lists/:id" element={<PartyDetailPage />} />
               <Route path="/explore" element={<ExplorePage />} />
               <Route path="/explore/:key" element={<CategoryDetailPage />} />
             </Route>

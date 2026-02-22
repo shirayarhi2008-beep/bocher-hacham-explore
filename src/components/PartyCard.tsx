@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Check } from 'lucide-react';
+import { Check, ChevronLeft } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Party } from '@/data/types';
 
 interface Props {
@@ -63,6 +64,16 @@ export default function PartyCard({ party, selected, onToggle, index }: Props) {
           <p className="font-bold text-sm" style={{ color: party.color }}>{party.avgSeniority}y</p>
         </div>
       </div>
+
+      {/* View details link */}
+      <Link
+        to={`/lists/${party.id}`}
+        onClick={e => e.stopPropagation()}
+        className="mt-3 flex items-center justify-center gap-1 text-sm text-primary font-medium hover:underline py-1"
+      >
+        צפו בפרטים
+        <ChevronLeft className="w-3.5 h-3.5" />
+      </Link>
     </motion.div>
   );
 }
