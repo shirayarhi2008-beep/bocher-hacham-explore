@@ -1,8 +1,7 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Home, Users, List, Compass } from 'lucide-react';
+import { Users, List, Compass } from 'lucide-react';
 
 const items = [
-  { icon: Home, label: 'ראשי', path: '/' },
   { icon: Users, label: 'אנשים', path: '/people' },
   { icon: List, label: 'רשימות', path: '/lists' },
   { icon: Compass, label: 'חקר', path: '/explore' },
