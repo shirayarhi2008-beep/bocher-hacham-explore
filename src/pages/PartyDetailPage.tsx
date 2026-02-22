@@ -1,17 +1,25 @@
-import { useParams, Link, useNavigate } from 'react-router-dom';
+import { useState, useEffect } from 'react';
+import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { ChevronRight, Users, GraduationCap, Calendar, Clock, Scale, ArrowLeft } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { getPartyById } from '@/data/parties';
+import { getPartyById, parties } from '@/data/parties';
 import { getCandidatesByParty } from '@/data/candidates';
 import { Button } from '@/components/ui/button';
 import CandidateCard from '@/components/CandidateCard';
+import IsraelMap from '@/components/IsraelMap';
+import ComparisonModal from '@/components/ComparisonModal';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 export default function PartyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const party = getPartyById(id || '');
   const candidates = getCandidatesByParty(id || '');
+
+  // Comparison state
+  const [comparePartyId, setComparePartyId] = useState<string>('');
+  const [compareOpen, setCompareOpen] = useState(false);
 
   if (!party) {
     return (
@@ -50,7 +58,7 @@ export default function PartyDetailPage() {
     value: candidates.filter(c => c.age >= b.min && c.age <= b.max).length,
   }));
 
-  // Region data
+  // Region data for map
   const regionMap: Record<string, number> = {};
   candidates.forEach(c => { regionMap[c.region] = (regionMap[c.region] || 0) + 1; });
   const regionData = Object.entries(regionMap)
@@ -65,6 +73,14 @@ export default function PartyDetailPage() {
     { icon: Clock, label: 'ותק ממוצע', value: `${party.avgSeniority} שנים` },
     { icon: GraduationCap, label: '% אקדמאים', value: `${party.educationBreakdown.academic}%` },
   ];
+
+  const otherParties = parties.filter(p => p.id !== party.id);
+  const compareParties = comparePartyId ? [party, getPartyById(comparePartyId)!].filter(Boolean) : [];
+
+  const handleCompareClick = () => {
+    if (!comparePartyId) return;
+    setCompareOpen(true);
+  };
 
   return (
     <div className="space-y-8 pb-8">
@@ -186,7 +202,7 @@ export default function PartyDetailPage() {
           </div>
         </motion.div>
 
-        {/* Region Bar */}
+        {/* Israel Map — Geographic distribution */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -194,15 +210,7 @@ export default function PartyDetailPage() {
           className="bg-card rounded-2xl border border-border p-5 shadow-card"
         >
           <h3 className="font-rubik font-bold text-lg mb-4">פריסה גיאוגרפית</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={regionData} layout="vertical">
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis type="number" tick={{ fontSize: 12 }} />
-              <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={80} />
-              <Tooltip formatter={(value: number) => [`${value} מועמדים`, '']} />
-              <Bar dataKey="value" fill={party.color} radius={[0, 6, 6, 0]} animationDuration={800} />
-            </BarChart>
-          </ResponsiveContainer>
+          <IsraelMap data={regionData} color={party.color} />
         </motion.div>
       </div>
 
@@ -216,7 +224,7 @@ export default function PartyDetailPage() {
         </div>
       </motion.div>
 
-      {/* Compare CTA */}
+      {/* Compare CTA — auto-adds this party */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -224,17 +232,52 @@ export default function PartyDetailPage() {
         className="bg-card rounded-2xl border-2 border-dashed border-primary/30 p-6 text-center shadow-card"
       >
         <Scale className="w-8 h-8 mx-auto mb-3 text-primary" />
-        <h3 className="font-rubik font-bold text-lg mb-1">רוצים להשוות?</h3>
-        <p className="text-muted-foreground text-sm mb-4">השוו את {party.name} עם מפלגה אחרת</p>
-        <Button
-          onClick={() => navigate('/lists')}
-          className="gradient-primary text-primary-foreground rounded-xl gap-2 shadow-glow"
-        >
-          <Scale className="w-4 h-4" />
-          עברו להשוואה
-          <ArrowLeft className="w-4 h-4" />
-        </Button>
+        <h3 className="font-rubik font-bold text-lg mb-1">השוו את {party.name}</h3>
+        <p className="text-muted-foreground text-sm mb-4">בחרו מפלגה להשוואה</p>
+
+        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
+          {/* Current party badge */}
+          <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-4 py-2">
+            <div
+              className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
+              style={{ backgroundColor: party.color }}
+            >
+              {party.name.slice(0, 2)}
+            </div>
+            <span className="text-sm font-medium">{party.name}</span>
+          </div>
+
+          <span className="text-muted-foreground font-bold">VS</span>
+
+          {/* Party selector */}
+          <Select value={comparePartyId} onValueChange={setComparePartyId}>
+            <SelectTrigger className="w-[180px] rounded-xl">
+              <SelectValue placeholder="בחרו מפלגה" />
+            </SelectTrigger>
+            <SelectContent>
+              {otherParties.map(p => (
+                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+
+          <Button
+            onClick={handleCompareClick}
+            disabled={!comparePartyId}
+            className="gradient-primary text-primary-foreground rounded-xl gap-2 shadow-glow disabled:opacity-50"
+          >
+            <Scale className="w-4 h-4" />
+            !השוו
+          </Button>
+        </div>
       </motion.div>
+
+      {/* Comparison Modal */}
+      <ComparisonModal
+        parties={compareParties}
+        open={compareOpen}
+        onClose={() => setCompareOpen(false)}
+      />
     </div>
   );
 }
