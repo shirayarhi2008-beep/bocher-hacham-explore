@@ -11,7 +11,8 @@ export default function Header({ onOpenFavorites }: { onOpenFavorites: () => voi
   const location = useLocation();
 
   const navItems = [
-    { label: 'אנשים', path: '/' },
+    { label: 'ראשי', path: '/' },
+    { label: 'אנשים', path: '/people' },
     { label: 'רשימות', path: '/lists' },
     { label: 'חקר', path: '/explore' },
   ];
