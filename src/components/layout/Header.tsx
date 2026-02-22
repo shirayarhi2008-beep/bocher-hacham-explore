@@ -11,7 +11,6 @@ export default function Header({ onOpenFavorites }: { onOpenFavorites: () => voi
   const location = useLocation();
 
   const navItems = [
-    { label: 'ראשי', path: '/' },
     { label: 'אנשים', path: '/people' },
     { label: 'רשימות', path: '/lists' },
     { label: 'חקר', path: '/explore' },
@@ -35,7 +34,7 @@ export default function Header({ onOpenFavorites }: { onOpenFavorites: () => voi
           <div className="w-9 h-9 rounded-xl gradient-primary flex items-center justify-center shadow-glow group-hover:scale-110 transition-transform duration-300">
             <span className="text-primary-foreground font-bold text-sm">בח</span>
           </div>
-          <span className="font-rubik font-bold text-lg text-gradient-primary hidden sm:block">בוחר חכם</span>
+          <span className="font-rubik font-bold text-lg text-gradient-primary hidden sm:block">בוחרים ח״כם</span>
         </Link>
 
         {/* Desktop Nav */}
