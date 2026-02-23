@@ -1,13 +1,10 @@
 import { useState, useRef } from 'react';
-import { Link } from 'react-router-dom';
-import { motion } from 'framer-motion';
+import { Link, useNavigate } from 'react-router-dom';
+import { motion, AnimatePresence } from 'framer-motion';
 import { Users, List, Compass, TrendingUp, BarChart3, Sparkles, ChevronLeft, ChevronDown } from 'lucide-react';
 import { parties } from '@/data/parties';
 import { candidates } from '@/data/candidates';
 import { categories } from '@/data/categories';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
-import { Label } from '@/components/ui/label';
-import { Button } from '@/components/ui/button';
 
 const quizQuestions = [
   {
@@ -25,8 +22,9 @@ const quizQuestions = [
 ];
 
 export default function HomePage() {
-  const [quizAnswers, setQuizAnswers] = useState<Record<number, string>>({});
+  const [quizStep, setQuizStep] = useState(0);
   const contentRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const scrollToContent = () => {
     contentRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -95,7 +93,15 @@ export default function HomePage() {
         >
           כל כך הרבה בלאגן, כל כך הרבה מידע
           <br />
-          מביאים לכם את השורה התחתונה, אתם — תבחרו בעצמכם
+          מביאים לכם את השורה התחתונה
+        </motion.p>
+        <motion.p
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.7 }}
+          className="mt-3 text-2xl md:text-3xl font-rubik font-bold opacity-95 relative z-10"
+        >
+          אתם — תבחרו בעצמכם
         </motion.p>
 
         <motion.button
@@ -116,63 +122,43 @@ export default function HomePage() {
       </motion.section>
 
       {/* Quiz Section */}
-      <div ref={contentRef} className="px-4 py-12 max-w-2xl mx-auto space-y-8">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="text-center mb-6"
-        >
-          <h2 className="font-rubik font-bold text-2xl md:text-3xl">לפני שמתחילים...</h2>
-          <p className="text-muted-foreground mt-2">ענו על 3 שאלות קצרות</p>
-        </motion.div>
-
-        {quizQuestions.map((q, qi) => (
+      <div ref={contentRef} className="px-4 py-12 max-w-lg mx-auto min-h-[60vh] flex flex-col items-center justify-center">
+        <AnimatePresence mode="wait">
           <motion.div
-            key={qi}
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: qi * 0.1 }}
-            className="bg-card rounded-2xl border border-border p-6 shadow-card"
+            key={quizStep}
+            initial={{ opacity: 0, x: -40 }}
+            animate={{ opacity: 1, x: 0 }}
+            exit={{ opacity: 0, x: 40 }}
+            transition={{ duration: 0.3 }}
+            className="w-full"
           >
-            <p className="font-rubik font-semibold text-base mb-4">
-              {qi + 1}. {q.question}
+            <p className="text-center text-sm text-muted-foreground mb-2">
+              {quizStep + 1} / {quizQuestions.length}
             </p>
-            <RadioGroup
-              value={quizAnswers[qi] || ''}
-              onValueChange={(val) => setQuizAnswers((prev) => ({ ...prev, [qi]: val }))}
-              className="space-y-3"
-            >
-              {q.answers.map((ans, ai) => (
-                <div key={ai} className="flex items-center gap-3">
-                  <RadioGroupItem value={ans} id={`q${qi}-a${ai}`} />
-                  <Label htmlFor={`q${qi}-a${ai}`} className="cursor-pointer text-sm">
+            <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+              <p className="font-rubik font-semibold text-lg mb-6 text-center">
+                {quizQuestions[quizStep].question}
+              </p>
+              <div className="space-y-3">
+                {quizQuestions[quizStep].answers.map((ans, ai) => (
+                  <button
+                    key={ai}
+                    onClick={() => {
+                      if (quizStep < quizQuestions.length - 1) {
+                        setQuizStep((s) => s + 1);
+                      } else {
+                        navigate('/people');
+                      }
+                    }}
+                    className="w-full text-right p-4 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground transition-colors duration-200 text-sm font-medium cursor-pointer"
+                  >
                     {ans}
-                  </Label>
-                </div>
-              ))}
-            </RadioGroup>
+                  </button>
+                ))}
+              </div>
+            </div>
           </motion.div>
-        ))}
-
-        <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          viewport={{ once: true }}
-          className="text-center"
-        >
-          <Button
-            size="lg"
-            className="rounded-full px-8"
-            onClick={() => {
-              const dashboard = document.getElementById('dashboard');
-              dashboard?.scrollIntoView({ behavior: 'smooth' });
-            }}
-          >
-            קדימה, בואו נחקור
-          </Button>
-        </motion.div>
+        </AnimatePresence>
       </div>
 
       {/* Dashboard */}
