@@ -1,42 +1,11 @@
-import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, List, Compass, Clock, TrendingUp, BarChart3, Sparkles, ChevronLeft } from 'lucide-react';
-import { Button } from '@/components/ui/button';
+import { Users, List, Compass, TrendingUp, BarChart3, Sparkles, ChevronLeft } from 'lucide-react';
 import { parties } from '@/data/parties';
 import { candidates } from '@/data/candidates';
 import { categories } from '@/data/categories';
 
-// Election date — set to a future date for demo
-const ELECTION_DATE = new Date('2026-11-03T07:00:00+02:00');
-
-function useCountdown(target: Date) {
-  const calc = () => {
-    const diff = Math.max(0, target.getTime() - Date.now());
-    return {
-      days: Math.floor(diff / 86400000),
-      hours: Math.floor((diff % 86400000) / 3600000),
-      minutes: Math.floor((diff % 3600000) / 60000),
-      seconds: Math.floor((diff % 60000) / 1000),
-    };
-  };
-  const [time, setTime] = useState(calc);
-  useEffect(() => {
-    const id = setInterval(() => setTime(calc), 1000);
-    return () => clearInterval(id);
-  }, []);
-  return time;
-}
-
-const countdownUnits = [
-  { key: 'days', label: 'ימים' },
-  { key: 'hours', label: 'שעות' },
-  { key: 'minutes', label: 'דקות' },
-  { key: 'seconds', label: 'שניות' },
-] as const;
-
 export default function HomePage() {
-  const countdown = useCountdown(ELECTION_DATE);
 
   const quickStats = [
     { label: 'מועמדים', value: candidates.length, icon: Users, color: 'hsl(var(--sky))' },
@@ -93,41 +62,7 @@ export default function HomePage() {
         </p>
       </motion.div>
 
-      {/* Countdown */}
-      <motion.div
-        initial={{ opacity: 0, y: 15 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.15 }}
-        className="bg-card rounded-2xl border border-border p-6 shadow-card text-center"
-      >
-        <div className="flex items-center justify-center gap-2 mb-4">
-          <Clock className="w-5 h-5 text-primary" />
-          <h2 className="font-rubik font-bold text-lg">ספירה לאחור לבחירות</h2>
-        </div>
-        <div className="flex justify-center gap-3 md:gap-5">
-          {countdownUnits.map(({ key, label }) => (
-            <motion.div
-              key={key}
-              initial={{ scale: 0.5, opacity: 0 }}
-              animate={{ scale: 1, opacity: 1 }}
-              transition={{ delay: 0.3 }}
-              className="flex flex-col items-center"
-            >
-              <div className="w-16 h-16 md:w-20 md:h-20 rounded-xl gradient-primary flex items-center justify-center shadow-glow">
-                <motion.span
-                  key={countdown[key]}
-                  initial={{ y: -8, opacity: 0 }}
-                  animate={{ y: 0, opacity: 1 }}
-                  className="text-primary-foreground font-bold text-2xl md:text-3xl font-rubik"
-                >
-                  {countdown[key]}
-                </motion.span>
-              </div>
-              <span className="text-xs text-muted-foreground mt-1.5 font-medium">{label}</span>
-            </motion.div>
-          ))}
-        </div>
-      </motion.div>
+
 
       {/* Quick Stats */}
       <div className="grid grid-cols-3 gap-3">
