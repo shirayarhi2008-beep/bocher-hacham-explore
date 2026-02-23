@@ -22,7 +22,7 @@ const quizQuestions = [
 ];
 
 export default function HomePage() {
-  const [quizStep, setQuizStep] = useState(0);
+  const [quizStep, setQuizStep] = useState(0); // 0..2 = questions, 3 = CTA
   const contentRef = useRef<HTMLDivElement>(null);
   const navigate = useNavigate();
 
@@ -124,40 +124,57 @@ export default function HomePage() {
       {/* Quiz Section */}
       <div ref={contentRef} className="px-4 py-12 max-w-lg mx-auto min-h-[60vh] flex flex-col items-center justify-center">
         <AnimatePresence mode="wait">
-          <motion.div
-            key={quizStep}
-            initial={{ opacity: 0, x: -40 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 40 }}
-            transition={{ duration: 0.3 }}
-            className="w-full"
-          >
-            <p className="text-center text-sm text-muted-foreground mb-2">
-              {quizStep + 1} / {quizQuestions.length}
-            </p>
-            <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
-              <p className="font-rubik font-semibold text-lg mb-6 text-center">
-                {quizQuestions[quizStep].question}
+          {quizStep < quizQuestions.length ? (
+            <motion.div
+              key={quizStep}
+              initial={{ opacity: 0, x: -40 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 40 }}
+              transition={{ duration: 0.3 }}
+              className="w-full"
+            >
+              <p className="text-center text-sm text-muted-foreground mb-2">
+                {quizStep + 1} / {quizQuestions.length}
               </p>
-              <div className="space-y-3">
-                {quizQuestions[quizStep].answers.map((ans, ai) => (
-                  <button
-                    key={ai}
-                    onClick={() => {
-                      if (quizStep < quizQuestions.length - 1) {
-                        setQuizStep((s) => s + 1);
-                      } else {
-                        navigate('/people');
-                      }
-                    }}
-                    className="w-full text-right p-4 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground transition-colors duration-200 text-sm font-medium cursor-pointer"
-                  >
-                    {ans}
-                  </button>
-                ))}
+              <div className="bg-card rounded-2xl border border-border p-6 shadow-card">
+                <p className="font-rubik font-semibold text-lg mb-6 text-center">
+                  {quizQuestions[quizStep].question}
+                </p>
+                <div className="space-y-3">
+                  {quizQuestions[quizStep].answers.map((ans, ai) => (
+                    <button
+                      key={ai}
+                      onClick={() => setQuizStep((s) => s + 1)}
+                      className="w-full text-right p-4 rounded-xl border border-border bg-background hover:bg-primary hover:text-primary-foreground transition-colors duration-200 text-sm font-medium cursor-pointer"
+                    >
+                      {ans}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+          ) : (
+            <motion.div
+              key="cta"
+              initial={{ opacity: 0, scale: 0.9 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0 }}
+              transition={{ duration: 0.4 }}
+              className="w-full text-center space-y-6"
+            >
+              <div className="w-16 h-16 rounded-2xl gradient-cool mx-auto flex items-center justify-center shadow-glow">
+                <Users className="w-8 h-8 text-primary-foreground" />
+              </div>
+              <h2 className="font-rubik font-bold text-2xl">מעולה! עכשיו אפשר להתחיל</h2>
+              <p className="text-muted-foreground">גלו את כל המועמדים, סננו והשוו</p>
+              <button
+                onClick={() => navigate('/people')}
+                className="mt-4 px-8 py-3 rounded-full bg-primary text-primary-foreground font-rubik font-bold text-lg hover:opacity-90 transition-opacity cursor-pointer shadow-glow"
+              >
+                בואו לחקור
+              </button>
+            </motion.div>
+          )}
         </AnimatePresence>
       </div>
 
