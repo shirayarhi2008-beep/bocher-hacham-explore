@@ -106,21 +106,19 @@ export default function CandidateModal({ candidate, open, onOpenChange }: Props)
                 transition={{ duration: 0.3 }}
                 className="overflow-hidden"
               >
-                <div className="mt-3 space-y-2">
+                <div className="mt-3 flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
                   {similar.map(sc => {
                     const scColor = getPartyColor(sc.partyId);
                     return (
-                      <div key={sc.id} className="flex items-center gap-3 p-3 rounded-xl bg-muted/30 border border-border">
+                      <div key={sc.id} className="flex flex-col items-center gap-1.5 min-w-[72px]">
                         <div
-                          className="w-9 h-9 rounded-lg flex items-center justify-center text-primary-foreground font-bold text-xs shrink-0"
+                          className="w-14 h-14 rounded-xl flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm"
                           style={{ backgroundColor: scColor }}
                         >
                           {sc.name.split(' ').map(n => n[0]).join('')}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-sm font-medium truncate">{sc.name}</p>
-                          <p className="text-xs text-muted-foreground">{sc.party} · {sc.profession}</p>
-                        </div>
+                        <p className="text-xs font-medium text-center truncate w-full">{sc.name.split(' ')[0]}</p>
+                        <p className="text-[10px] text-muted-foreground text-center truncate w-full">{sc.party}</p>
                       </div>
                     );
                   })}
