@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Users, List, Compass, TrendingUp, BarChart3, Sparkles, ChevronLeft, ChevronDown, SkipForward } from 'lucide-react';
+import { Users, BarChart3, Sparkles, ChevronLeft, ChevronDown, SkipForward } from 'lucide-react';
 import { parties } from '@/data/parties';
 import { candidates } from '@/data/candidates';
 import { categories } from '@/data/categories';
@@ -60,12 +60,6 @@ export default function HomePage() {
   };
 
   const progressPercent = (quizStep / quizQuestions.length) * 100;
-
-  const quickStats = [
-    { label: 'מועמדים', value: candidates.length, icon: Users, color: 'hsl(var(--sky))' },
-    { label: 'מפלגות', value: parties.length, icon: List, color: 'hsl(var(--violet))' },
-    { label: 'נושאים לחקירה', value: categories.length, icon: Compass, color: 'hsl(var(--emerald))' },
-  ];
 
   const entryPoints = [
     {
@@ -153,7 +147,7 @@ export default function HomePage() {
 
       {/* Quiz Section */}
       {!skipQuiz && (
-        <div ref={contentRef} className="px-4 py-12 max-w-lg mx-auto min-h-[60vh] flex flex-col items-center justify-center">
+        <div ref={contentRef} className="px-4 py-8 max-w-lg mx-auto min-h-[calc(100vh-4rem)] flex flex-col items-center justify-center">
           {/* Progress Bar */}
           {quizStep <= quizQuestions.length && (
             <div className="w-full mb-6 space-y-1">
@@ -248,24 +242,6 @@ export default function HomePage() {
 
       {/* Dashboard */}
       <div id="dashboard" ref={skipQuiz ? contentRef : undefined} className="px-4 pb-8 space-y-10 max-w-5xl mx-auto">
-        {/* Quick Stats */}
-        <div className="grid grid-cols-3 gap-3">
-          {quickStats.map((stat, i) => (
-            <motion.div
-              key={stat.label}
-              initial={{ opacity: 0, y: 15 }}
-              whileInView={{ opacity: 1, y: 0 }}
-              viewport={{ once: true }}
-              transition={{ delay: i * 0.08 }}
-              className="bg-card rounded-xl border border-border p-4 text-center shadow-card"
-            >
-              <stat.icon className="w-6 h-6 mx-auto mb-2" style={{ color: stat.color }} />
-              <p className="font-bold text-xl font-rubik" style={{ color: stat.color }}>{stat.value}</p>
-              <p className="text-xs text-muted-foreground">{stat.label}</p>
-            </motion.div>
-          ))}
-        </div>
-
         {/* Entry Points */}
         <div className="space-y-3">
           <h2 className="font-rubik font-bold text-xl">מאיפה מתחילים?</h2>
@@ -296,60 +272,6 @@ export default function HomePage() {
             ))}
           </div>
         </div>
-
-        {/* Top Parties Widget */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-card"
-        >
-          <div className="flex items-center justify-between mb-4">
-            <div className="flex items-center gap-2">
-              <TrendingUp className="w-5 h-5 text-primary" />
-              <h2 className="font-rubik font-bold text-lg">המפלגות הגדולות</h2>
-            </div>
-            <Link to="/lists" className="text-sm text-primary font-medium hover:underline">
-              כל הרשימות
-            </Link>
-          </div>
-          <div className="space-y-3">
-            {topParties.map((party, i) => (
-              <motion.div
-                key={party.id}
-                initial={{ opacity: 0, x: 10 }}
-                whileInView={{ opacity: 1, x: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.06 }}
-              >
-                <Link to={`/lists/${party.id}`} className="flex items-center gap-3 p-2 rounded-xl hover:bg-muted/50 transition-colors group">
-                  <span className="text-xs text-muted-foreground w-5 text-center font-bold">{i + 1}</span>
-                  <div
-                    className="w-9 h-9 rounded-lg flex items-center justify-center text-primary-foreground font-bold text-xs shadow-sm"
-                    style={{ backgroundColor: party.color }}
-                  >
-                    {party.name.slice(0, 2)}
-                  </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="font-medium text-sm">{party.name}</p>
-                    <p className="text-xs text-muted-foreground">{party.seats} מנדטים</p>
-                  </div>
-                  <div className="w-24 h-2 bg-muted rounded-full overflow-hidden">
-                    <motion.div
-                      initial={{ width: 0 }}
-                      whileInView={{ width: `${(party.seats / topParties[0].seats) * 100}%` }}
-                      viewport={{ once: true }}
-                      transition={{ duration: 0.6 }}
-                      className="h-full rounded-full"
-                      style={{ backgroundColor: party.color }}
-                    />
-                  </div>
-                  <ChevronLeft className="w-4 h-4 text-muted-foreground group-hover:text-foreground transition-colors" />
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </motion.div>
       </div>
     </div>
   );
