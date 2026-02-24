@@ -80,7 +80,7 @@ export default function ComparisonModal({ parties, open, onClose }: Props) {
             animate={{ opacity: 1, scale: 1, y: 0 }}
             exit={{ opacity: 0, scale: 0.9, y: 30 }}
             transition={{ type: 'spring', damping: 25 }}
-            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[700px] md:max-h-[85vh] bg-card rounded-2xl shadow-xl border border-border z-50 flex flex-col overflow-hidden"
+            className="fixed inset-4 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[800px] md:max-h-[85vh] bg-card rounded-2xl shadow-xl border border-border z-50 flex flex-col overflow-hidden"
           >
             {/* Header */}
             <div className="p-4 border-b border-border flex items-center justify-between">
@@ -126,7 +126,26 @@ export default function ComparisonModal({ parties, open, onClose }: Props) {
               {/* Simple Mode */}
               {!advancedMode && (
                 <>
-                  {/* Metrics table */}
+                  {/* Visual chart comparison FIRST */}
+                  <motion.div
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 }}
+                  >
+                    <h3 className="font-rubik font-bold text-sm mb-3">השוואה חזותית</h3>
+                    <ResponsiveContainer width="100%" height={200}>
+                      <BarChart data={chartData}>
+                        <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
+                        <YAxis tick={{ fontSize: 10 }} />
+                        <Tooltip />
+                        {parties.map(p => (
+                          <Bar key={p.id} dataKey={p.id} name={p.name} fill={p.color} radius={[4, 4, 0, 0]} />
+                        ))}
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </motion.div>
+
+                  {/* Metrics table SECOND */}
                   <div className="space-y-2">
                     {metrics.map((metric, i) => (
                       <motion.div
@@ -146,25 +165,6 @@ export default function ComparisonModal({ parties, open, onClose }: Props) {
                       </motion.div>
                     ))}
                   </div>
-
-                  {/* Mini bar chart comparison */}
-                  <motion.div
-                    initial={{ opacity: 0, y: 10 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.3 }}
-                  >
-                    <h3 className="font-rubik font-bold text-sm mb-3">השוואה חזותית</h3>
-                    <ResponsiveContainer width="100%" height={180}>
-                      <BarChart data={chartData}>
-                        <XAxis dataKey="metric" tick={{ fontSize: 10 }} />
-                        <YAxis tick={{ fontSize: 10 }} />
-                        <Tooltip />
-                        {parties.map(p => (
-                          <Bar key={p.id} dataKey={p.id} name={p.name} fill={p.color} radius={[4, 4, 0, 0]} />
-                        ))}
-                      </BarChart>
-                    </ResponsiveContainer>
-                  </motion.div>
                 </>
               )}
 
