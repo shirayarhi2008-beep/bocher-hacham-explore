@@ -3,9 +3,9 @@ import { Link } from 'react-router-dom';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Candidate } from '@/data/types';
 import { getPartyColor } from '@/data/parties';
-import { candidates as allCandidates } from '@/data/candidates';
+import { candidates as allCandidates, getCandidatesByParty } from '@/data/candidates';
 import { Badge } from '@/components/ui/badge';
-import { User, MapPin, Briefcase, GraduationCap, Calendar, Clock, Users, ChevronDown, X } from 'lucide-react';
+import { User, MapPin, Briefcase, GraduationCap, Calendar, Clock, Users, ChevronDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface Props {
@@ -29,11 +29,22 @@ function getSimilarCandidates(candidate: Candidate, all: Candidate[]): Candidate
   return scored.slice(0, 4).map(s => s.candidate);
 }
 
+function getListPosition(candidate: Candidate): number {
+  const partyCandidates = getCandidatesByParty(candidate.partyId);
+  return partyCandidates.findIndex(c => c.id === candidate.id) + 1;
+}
+
 export default function CandidateModal({ candidate, open, onOpenChange }: Props) {
   const [showSimilar, setShowSimilar] = useState(false);
+  const [selectedSimilar, setSelectedSimilar] = useState<Candidate | null>(null);
 
   const similar = useMemo(
     () => (candidate ? getSimilarCandidates(candidate, allCandidates) : []),
+    [candidate]
+  );
+
+  const listPosition = useMemo(
+    () => (candidate ? getListPosition(candidate) : 0),
     [candidate]
   );
 
@@ -49,11 +60,32 @@ export default function CandidateModal({ candidate, open, onOpenChange }: Props)
     { icon: Clock, label: 'ותק פוליטי', value: `${candidate.seniority} שנים` },
   ];
 
+  // If a similar candidate is selected, show their modal instead
+  if (selectedSimilar) {
+    return (
+      <CandidateModal
+        candidate={selectedSimilar}
+        open={open}
+        onOpenChange={(o) => {
+          if (!o) {
+            setSelectedSimilar(null);
+            onOpenChange(false);
+          }
+        }}
+      />
+    );
+  }
+
   return (
     <Dialog open={open} onOpenChange={(o) => { onOpenChange(o); if (!o) setShowSimilar(false); }}>
       <DialogContent className="max-w-sm rounded-2xl p-0 overflow-hidden max-h-[90vh] overflow-y-auto" dir="rtl">
         {/* Header with party color */}
         <div className="h-24 relative flex items-end justify-center" style={{ backgroundColor: color }}>
+          {/* List position badge */}
+          <div className="absolute top-3 right-3 bg-background/90 backdrop-blur-sm rounded-lg px-2.5 py-1 shadow-sm">
+            <span className="text-xs text-muted-foreground">מקום </span>
+            <span className="font-rubik font-bold text-sm" style={{ color }}>#{listPosition}</span>
+          </div>
           <div className="absolute -bottom-10 w-20 h-20 rounded-2xl bg-card border-4 border-background flex items-center justify-center text-2xl font-bold shadow-lg" style={{ color }}>
             {candidate.name.split(' ').map(n => n[0]).join('')}
           </div>
@@ -109,17 +141,27 @@ export default function CandidateModal({ candidate, open, onOpenChange }: Props)
                 <div className="mt-3 flex gap-3 overflow-x-auto pb-2" style={{ scrollbarWidth: 'none' }}>
                   {similar.map(sc => {
                     const scColor = getPartyColor(sc.partyId);
+                    const scPosition = getListPosition(sc);
                     return (
-                      <div key={sc.id} className="flex flex-col items-center gap-1.5 min-w-[72px]">
-                        <div
-                          className="w-14 h-14 rounded-xl flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm"
-                          style={{ backgroundColor: scColor }}
-                        >
-                          {sc.name.split(' ').map(n => n[0]).join('')}
+                      <button
+                        key={sc.id}
+                        onClick={() => setSelectedSimilar(sc)}
+                        className="flex flex-col items-center gap-1.5 min-w-[72px] cursor-pointer hover:opacity-80 transition-opacity"
+                      >
+                        <div className="relative">
+                          <div
+                            className="w-14 h-14 rounded-xl flex items-center justify-center text-primary-foreground font-bold text-sm shadow-sm"
+                            style={{ backgroundColor: scColor }}
+                          >
+                            {sc.name.split(' ').map(n => n[0]).join('')}
+                          </div>
+                          <div className="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-background border border-border flex items-center justify-center">
+                            <span className="text-[9px] font-bold" style={{ color: scColor }}>#{scPosition}</span>
+                          </div>
                         </div>
                         <p className="text-xs font-medium text-center truncate w-full">{sc.name.split(' ')[0]}</p>
                         <p className="text-[10px] text-muted-foreground text-center truncate w-full">{sc.party}</p>
-                      </div>
+                      </button>
                     );
                   })}
                 </div>

@@ -11,6 +11,7 @@ import ListsPage from "./pages/ListsPage";
 import PartyDetailPage from "./pages/PartyDetailPage";
 import ExplorePage from "./pages/ExplorePage";
 import CategoryDetailPage from "./pages/CategoryDetailPage";
+import MockupPage from "./pages/MockupPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
               <Route path="/lists/:id" element={<PartyDetailPage />} />
               <Route path="/explore" element={<ExplorePage />} />
               <Route path="/explore/:key" element={<CategoryDetailPage />} />
+              <Route path="/mockups" element={<MockupPage />} />
             </Route>
             <Route path="*" element={<NotFound />} />
           </Routes>

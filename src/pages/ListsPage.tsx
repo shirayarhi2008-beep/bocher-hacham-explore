@@ -13,7 +13,6 @@ export default function ListsPage() {
   const toggleParty = (id: string) => {
     setSelected(prev => {
       if (prev.includes(id)) return prev.filter(s => s !== id);
-      if (prev.length >= 2) return prev;
       return [...prev, id];
     });
   };
@@ -24,7 +23,7 @@ export default function ListsPage() {
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
         <h1 className="font-rubik font-bold text-2xl md:text-3xl text-gradient-primary">רשימות</h1>
-        <p className="text-muted-foreground text-sm mt-1">בחרו עד 2 מפלגות להשוואה</p>
+        <p className="text-muted-foreground text-sm mt-1">בחרו מפלגות להשוואה</p>
       </motion.div>
 
       {/* Selection status */}
@@ -34,7 +33,7 @@ export default function ListsPage() {
         className="flex items-center justify-between bg-card rounded-xl p-3 border border-border shadow-card"
       >
         <span className="text-sm font-medium">
-          <span className="font-bold text-primary">{selected.length}</span>/2 נבחרו
+          <span className="font-bold text-primary">{selected.length}</span> נבחרו
         </span>
         {selected.length >= 2 && (
           <motion.div initial={{ scale: 0 }} animate={{ scale: 1 }}>
