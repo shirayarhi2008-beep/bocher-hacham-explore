@@ -12,10 +12,6 @@ const SKIP_QUIZ_KEY = 'skip-homepage-quiz';
 
 const quizQuestions = [
   {
-    question: 'באיזה אזור על המפה הפוליטית את/ה מרגיש/ה הכי בנוח?',
-    answers: ['ימין', 'מרכז', 'שמאל', 'א-מפלגתי (איכות האנשים)'],
-  },
-  {
     question: 'מה הכי חשוב לך בנציג הציבור שלך?',
     answers: ['ניסיון ועשייה', 'יושרה ושקיפות', 'ייצוגיות וגיוון', 'התאמה רעיונית'],
   },
@@ -115,9 +111,9 @@ export default function HomePage() {
           transition={{ delay: 0.5 }}
           className="mt-6 text-lg md:text-xl max-w-lg leading-relaxed opacity-90 relative z-10"
         >
-          כל כך הרבה בלאגן, כל כך הרבה מידע
+          כל כך הרבה מידע
           <br />
-          אנחנו נביא לכם את השורה התחתונה
+          אנחנו נעזור לכם לעשות סדר בבלאגן
         </motion.p>
         <motion.p
           initial={{ opacity: 0, y: 20 }}
@@ -125,7 +121,7 @@ export default function HomePage() {
           transition={{ delay: 0.7 }}
           className="mt-3 text-2xl md:text-3xl font-rubik font-bold opacity-95 relative z-10"
         >
-          אתם — כבר תבחרו בעצמכם
+          אתם, כבר תבחרו בעצמכם
         </motion.p>
 
         <motion.button
