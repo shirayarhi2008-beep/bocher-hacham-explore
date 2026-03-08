@@ -53,6 +53,7 @@ export default function HomePage() {
     if (dontAskAgain) {
       localStorage.setItem(SKIP_QUIZ_KEY, 'true');
     }
+    navigate('/people');
   };
 
   const progressPercent = (quizStep / quizQuestions.length) * 100;
@@ -190,14 +191,13 @@ export default function HomePage() {
                     />
                     אל תשאל אותי שוב
                   </label>
-                  <a
-                    href="#dashboard"
+                  <button
                     onClick={handleSkip}
-                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors"
+                    className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
                   >
                     <SkipForward className="w-4 h-4" />
-                    דלג לדשבורד
-                  </a>
+                    דלג לרשימת המועמדים
+                  </button>
                 </div>
               </motion.div>
             ) : (
