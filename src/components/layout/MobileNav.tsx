@@ -2,7 +2,7 @@ import { Link, useLocation } from 'react-router-dom';
 import { Users, List, Compass } from 'lucide-react';
 
 const items = [
-  { icon: Users, label: 'אנשים', path: '/people' },
+  { icon: Users, label: 'מועמדים', path: '/people' },
   { icon: List, label: 'רשימות', path: '/lists' },
   { icon: Compass, label: 'חקר', path: '/explore' },
 ];
