@@ -97,14 +97,6 @@ export default function PeoplePage() {
             </SelectContent>
           </Select>
 
-          <Button
-            variant="outline"
-            onClick={handleSurprise}
-            className="rounded-xl gap-2 hover:gradient-primary hover:text-primary-foreground hover:border-transparent transition-all duration-300"
-          >
-            <Dice5 className="w-4 h-4" />
-            הפתע אותי
-          </Button>
         </div>
       </motion.div>
 
