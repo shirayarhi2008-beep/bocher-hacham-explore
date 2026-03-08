@@ -210,7 +210,7 @@ export default function PartyDetailPage() {
           className="bg-card rounded-2xl border border-border p-5 shadow-card"
         >
           <h3 className="font-rubik font-bold text-lg mb-4">פריסה גיאוגרפית</h3>
-          <IsraelMap data={regionData} color={party.color} />
+          <IsraelMap data={regionData} color={party.color} candidates={candidates} />
         </motion.div>
       </div>
 
