@@ -34,7 +34,7 @@ export const parties: Party[] = [
     genderRatio: 38, avgAge: 45, educationBreakdown: { academic: 63, professional: 25, other: 12 }, avgSeniority: 7,
   },
   {
-    id: 'meretz', name: 'מרצ', color: '#22c55e', seats: 6, candidates: 10,
+    id: 'meretz', name: 'דמוקרטים', color: '#22c55e', seats: 6, candidates: 10,
     genderRatio: 60, avgAge: 43, educationBreakdown: { academic: 80, professional: 15, other: 5 }, avgSeniority: 5,
   },
   {
@@ -42,11 +42,11 @@ export const parties: Party[] = [
     genderRatio: 13, avgAge: 46, educationBreakdown: { academic: 38, professional: 37, other: 25 }, avgSeniority: 4,
   },
   {
-    id: 'noam', name: 'נועם', color: '#a855f7', seats: 1, candidates: 5,
+    id: 'noam', name: 'ציונות הדתית', color: '#a855f7', seats: 1, candidates: 5,
     genderRatio: 0, avgAge: 42, educationBreakdown: { academic: 40, professional: 40, other: 20 }, avgSeniority: 2,
   },
   {
-    id: 'avoda', name: 'העבודה', color: '#e11d48', seats: 4, candidates: 10,
+    id: 'avoda', name: 'דמוקרטים', color: '#e11d48', seats: 4, candidates: 10,
     genderRatio: 50, avgAge: 49, educationBreakdown: { academic: 70, professional: 20, other: 10 }, avgSeniority: 9,
   },
 ];

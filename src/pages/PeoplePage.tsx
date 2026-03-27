@@ -44,7 +44,7 @@ export default function PeoplePage() {
   return (
     <div className="space-y-6">
       <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-rubik font-bold text-2xl md:text-3xl text-gradient-primary">אנשים</h1>
+        <h1 className="font-rubik font-bold text-2xl md:text-3xl text-gradient-primary">מועמדים</h1>
         <p className="text-muted-foreground text-sm mt-1">{totalCount} מועמדים מ-{parties.length} מפלגות</p>
       </motion.div>
 

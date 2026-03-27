@@ -40,7 +40,7 @@ const flows = [
         label: 'חיפוש מועמדים',
         content: (
           <div className="flex flex-col h-full bg-background p-3">
-            <p className="font-rubik font-bold text-xs mb-2">אנשים</p>
+            <p className="font-rubik font-bold text-xs mb-2">מועמדים</p>
             <div className="bg-card rounded-lg border border-border p-2 mb-2">
               <div className="h-2 w-20 bg-muted rounded" />
             </div>
@@ -236,7 +236,7 @@ const flows = [
         label: 'סימון מועדף',
         content: (
           <div className="flex flex-col h-full bg-background p-3">
-            <p className="font-rubik font-bold text-xs mb-2">אנשים</p>
+            <p className="font-rubik font-bold text-xs mb-2">מועמדים</p>
             {[true, false, true].map((fav, i) => (
               <div key={i} className="bg-card rounded-lg border border-border p-2 mb-1.5 flex items-center gap-2">
                 <div className="w-6 h-6 rounded-md bg-primary/20" />
