@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { X, ToggleLeft, ToggleRight } from 'lucide-react';
 import { Party } from '@/data/types';
@@ -39,6 +39,15 @@ export default function ComparisonModal({ parties, open, onClose }: Props) {
   const [advancedMode, setAdvancedMode] = useState(false);
   const [filterMetric, setFilterMetric] = useState<FilterMetric>('age');
   const [filterRange, setFilterRange] = useState<[number, number]>([25, 70]);
+
+  useEffect(() => {
+    if (open) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => { document.body.style.overflow = ''; };
+  }, [open]);
 
   if (parties.length < 2) return null;
 

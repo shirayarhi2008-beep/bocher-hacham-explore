@@ -10,6 +10,7 @@ export interface Candidate {
   seniority: number; // years in politics
   profession: string;
   photoUrl?: string;
+  listPosition: number; // position in party list
 }
 
 export interface Party {

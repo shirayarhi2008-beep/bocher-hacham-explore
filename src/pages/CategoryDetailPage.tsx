@@ -188,8 +188,11 @@ export default function CategoryDetailPage() {
         transition={{ delay: 0.4 }}
         className="bg-card rounded-2xl border border-border overflow-hidden shadow-card"
       >
-        <div className="p-4 border-b border-border">
+        <div className="p-4 border-b border-border flex items-center justify-between">
           <h3 className="font-rubik font-bold">דירוג מפלגות</h3>
+          <span className="text-xs text-muted-foreground bg-muted px-2 py-1 rounded-lg">
+            {key === 'gender' ? '% נשים' : key === 'age' ? 'גיל ממוצע' : key === 'seniority' ? 'ותק ממוצע' : 'מנדטים'}
+          </span>
         </div>
         <div className="divide-y divide-border">
           {rankingData.map((item, i) => (
@@ -217,7 +220,7 @@ export default function CategoryDetailPage() {
         className="text-center"
       >
         <Button
-          onClick={() => navigate('/')}
+          onClick={() => navigate('/people')}
           className="gradient-primary text-primary-foreground rounded-xl gap-2 px-8 h-12 text-base shadow-glow hover:shadow-hover transition-shadow"
         >
           {ctaMap[key || '']?.label || 'סנן מועמדים'}
