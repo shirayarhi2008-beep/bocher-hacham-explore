@@ -2,52 +2,56 @@ import { Party } from './types';
 
 export const parties: Party[] = [
   {
-    id: 'likud', name: 'הליכוד', color: '#2563eb', seats: 32, candidates: 15,
-    genderRatio: 27, avgAge: 52, educationBreakdown: { academic: 60, professional: 25, other: 15 }, avgSeniority: 12,
+    id: 'likud', name: 'הליכוד', color: '#1d4ed8', seats: 32, candidates: 41,
+    genderRatio: 22, avgAge: 54, educationBreakdown: { academic: 62, professional: 22, other: 16 }, avgSeniority: 14,
   },
   {
-    id: 'yesh-atid', name: 'יש עתיד', color: '#06b6d4', seats: 24, candidates: 14,
-    genderRatio: 43, avgAge: 47, educationBreakdown: { academic: 71, professional: 21, other: 8 }, avgSeniority: 6,
+    id: 'yesh-atid', name: 'יש עתיד', color: '#0ea5e9', seats: 24, candidates: 26,
+    genderRatio: 40, avgAge: 48, educationBreakdown: { academic: 72, professional: 20, other: 8 }, avgSeniority: 8,
   },
   {
-    id: 'mahaneh-mamlachti', name: 'המחנה הממלכתי', color: '#3b82f6', seats: 12, candidates: 12,
-    genderRatio: 42, avgAge: 50, educationBreakdown: { academic: 75, professional: 17, other: 8 }, avgSeniority: 8,
+    id: 'mahaneh-mamlachti', name: 'המחנה הממלכתי', color: '#3b82f6', seats: 12, candidates: 15,
+    genderRatio: 40, avgAge: 51, educationBreakdown: { academic: 78, professional: 15, other: 7 }, avgSeniority: 9,
   },
   {
-    id: 'shas', name: 'ש"ס', color: '#7c3aed', seats: 11, candidates: 10,
-    genderRatio: 0, avgAge: 55, educationBreakdown: { academic: 30, professional: 20, other: 50 }, avgSeniority: 15,
+    id: 'shas', name: 'ש"ס', color: '#6d28d9', seats: 11, candidates: 14,
+    genderRatio: 0, avgAge: 56, educationBreakdown: { academic: 28, professional: 22, other: 50 }, avgSeniority: 16,
   },
   {
-    id: 'yahadut-hatora', name: 'יהדות התורה', color: '#1e293b', seats: 7, candidates: 8,
-    genderRatio: 0, avgAge: 58, educationBreakdown: { academic: 25, professional: 15, other: 60 }, avgSeniority: 18,
+    id: 'zionut-datit', name: 'הציונות הדתית', color: '#f97316', seats: 7, candidates: 10,
+    genderRatio: 10, avgAge: 47, educationBreakdown: { academic: 55, professional: 30, other: 15 }, avgSeniority: 5,
   },
   {
-    id: 'israel-beytenu', name: 'ישראל ביתנו', color: '#dc2626', seats: 6, candidates: 8,
-    genderRatio: 25, avgAge: 51, educationBreakdown: { academic: 50, professional: 30, other: 20 }, avgSeniority: 10,
+    id: 'otzma', name: 'עוצמה יהודית', color: '#dc2626', seats: 6, candidates: 10,
+    genderRatio: 10, avgAge: 46, educationBreakdown: { academic: 40, professional: 35, other: 25 }, avgSeniority: 4,
   },
   {
-    id: 'raam', name: 'רע"מ', color: '#16a34a', seats: 5, candidates: 8,
-    genderRatio: 13, avgAge: 48, educationBreakdown: { academic: 50, professional: 25, other: 25 }, avgSeniority: 5,
+    id: 'yahadut-hatora', name: 'יהדות התורה', color: '#1e293b', seats: 7, candidates: 9,
+    genderRatio: 0, avgAge: 59, educationBreakdown: { academic: 22, professional: 18, other: 60 }, avgSeniority: 19,
   },
   {
-    id: 'hadash-taal', name: 'חד"ש-תע"ל', color: '#ef4444', seats: 5, candidates: 8,
-    genderRatio: 38, avgAge: 45, educationBreakdown: { academic: 63, professional: 25, other: 12 }, avgSeniority: 7,
+    id: 'israel-beytenu', name: 'ישראל ביתנו', color: '#b91c1c', seats: 6, candidates: 8,
+    genderRatio: 25, avgAge: 52, educationBreakdown: { academic: 55, professional: 28, other: 17 }, avgSeniority: 11,
   },
   {
-    id: 'meretz', name: 'דמוקרטים', color: '#22c55e', seats: 6, candidates: 10,
-    genderRatio: 60, avgAge: 43, educationBreakdown: { academic: 80, professional: 15, other: 5 }, avgSeniority: 5,
+    id: 'raam', name: 'רע"מ', color: '#16a34a', seats: 5, candidates: 6,
+    genderRatio: 0, avgAge: 49, educationBreakdown: { academic: 52, professional: 28, other: 20 }, avgSeniority: 6,
   },
   {
-    id: 'otzma', name: 'עוצמה יהודית', color: '#f59e0b', seats: 7, candidates: 8,
-    genderRatio: 13, avgAge: 46, educationBreakdown: { academic: 38, professional: 37, other: 25 }, avgSeniority: 4,
+    id: 'hadash-taal', name: 'חד"ש-תע"ל', color: '#ef4444', seats: 5, candidates: 7,
+    genderRatio: 30, avgAge: 46, educationBreakdown: { academic: 65, professional: 22, other: 13 }, avgSeniority: 8,
   },
   {
-    id: 'noam', name: 'ציונות הדתית', color: '#a855f7', seats: 1, candidates: 5,
-    genderRatio: 0, avgAge: 42, educationBreakdown: { academic: 40, professional: 40, other: 20 }, avgSeniority: 2,
+    id: 'democrats', name: 'הדמוקרטים', color: '#22c55e', seats: 8, candidates: 12,
+    genderRatio: 55, avgAge: 44, educationBreakdown: { academic: 82, professional: 12, other: 6 }, avgSeniority: 6,
   },
   {
-    id: 'avoda', name: 'דמוקרטים', color: '#e11d48', seats: 4, candidates: 10,
-    genderRatio: 50, avgAge: 49, educationBreakdown: { academic: 70, professional: 20, other: 10 }, avgSeniority: 9,
+    id: 'bennett26', name: 'בנט 26', color: '#0891b2', seats: 0, candidates: 5,
+    genderRatio: 30, avgAge: 46, educationBreakdown: { academic: 70, professional: 20, other: 10 }, avgSeniority: 3,
+  },
+  {
+    id: 'yashar', name: 'ישר', color: '#7c3aed', seats: 0, candidates: 4,
+    genderRatio: 35, avgAge: 44, educationBreakdown: { academic: 68, professional: 22, other: 10 }, avgSeniority: 4,
   },
 ];
 

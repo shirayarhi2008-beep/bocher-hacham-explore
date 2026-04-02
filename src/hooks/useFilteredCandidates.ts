@@ -1,47 +1,116 @@
 import { useMemo, useState } from 'react';
-import { Candidate } from '@/data/types';
 import { candidates as allCandidates } from '@/data/candidates';
 
+export interface CandidateFilters {
+  search: string;
+  orientation: string;             // 'all' | 'ימין' | 'מרכז' | 'שמאל'
+  parties: string[];               // partyIds (empty = all)
+  listPositionRange: [number, number];
+  newcomerOnly: boolean;
+  gender: string;                  // 'all' | 'male' | 'female'
+  topics: string[];                // ticket values (empty = all)
+}
+
+const MAX_POSITION = Math.max(...allCandidates.map(c => c.listPosition), 40);
+
+export const DEFAULT_FILTERS: CandidateFilters = {
+  search: '',
+  orientation: 'all',
+  parties: [],
+  listPositionRange: [1, MAX_POSITION],
+  newcomerOnly: false,
+  gender: 'all',
+  topics: [],
+};
+
+// Unique topics extracted from ticket1 + ticket2 across all candidates
+export const ALL_TOPICS: string[] = [
+  ...new Set(
+    allCandidates.flatMap(c => [c.ticket1, c.ticket2].filter((t): t is string => !!t))
+  ),
+].sort();
+
+export const MAX_LIST_POSITION = MAX_POSITION;
+
+export function countActiveFilters(f: CandidateFilters): number {
+  let n = 0;
+  if (f.search) n++;
+  if (f.orientation !== 'all') n++;
+  if (f.parties.length > 0) n++;
+  if (f.listPositionRange[0] > 1 || f.listPositionRange[1] < MAX_POSITION) n++;
+  if (f.newcomerOnly) n++;
+  if (f.gender !== 'all') n++;
+  if (f.topics.length > 0) n++;
+  return n;
+}
+
 export function useFilteredCandidates() {
-  const [search, setSearch] = useState('');
-  const [genderFilter, setGenderFilter] = useState<string>('all');
-  const [regionFilter, setRegionFilter] = useState<string>('all');
-  const [partyFilter, setPartyFilter] = useState<string>('all');
+  const [filters, setFilters] = useState<CandidateFilters>(DEFAULT_FILTERS);
+
+  const updateFilter = <K extends keyof CandidateFilters>(key: K, value: CandidateFilters[K]) => {
+    setFilters(prev => ({ ...prev, [key]: value }));
+  };
+
+  const resetFilters = () => setFilters(DEFAULT_FILTERS);
 
   const filtered = useMemo(() => {
     let result = allCandidates;
-    if (search) {
+
+    if (filters.search) {
+      const q = filters.search.toLowerCase();
       result = result.filter(c =>
-        c.name.includes(search) || c.party.includes(search) || c.profession.includes(search)
+        c.name.includes(filters.search) ||
+        c.party.includes(filters.search) ||
+        c.profession?.includes(filters.search) ||
+        c.ticket1?.includes(filters.search) ||
+        c.ticket2?.includes(filters.search)
+      );
+      void q;
+    }
+
+    if (filters.orientation !== 'all') {
+      result = result.filter(c => c.orientation === filters.orientation);
+    }
+
+    if (filters.parties.length > 0) {
+      result = result.filter(c => filters.parties.includes(c.partyId));
+    }
+
+    const [minPos, maxPos] = filters.listPositionRange;
+    if (minPos > 1 || maxPos < MAX_POSITION) {
+      result = result.filter(c => c.listPosition >= minPos && c.listPosition <= maxPos);
+    }
+
+    if (filters.newcomerOnly) {
+      result = result.filter(c => c.isNewcomer);
+    }
+
+    if (filters.gender !== 'all') {
+      result = result.filter(c => c.gender === filters.gender);
+    }
+
+    if (filters.topics.length > 0) {
+      result = result.filter(c =>
+        filters.topics.some(t => c.ticket1 === t || c.ticket2 === t)
       );
     }
-    if (genderFilter !== 'all') {
-      result = result.filter(c => c.gender === genderFilter);
-    }
-    if (regionFilter !== 'all') {
-      result = result.filter(c => c.region === regionFilter);
-    }
-    if (partyFilter !== 'all') {
-      result = result.filter(c => c.partyId === partyFilter);
-    }
+
     return result;
-  }, [search, genderFilter, regionFilter, partyFilter]);
+  }, [filters]);
 
-  const randomCandidate = () => {
-    const idx = Math.floor(Math.random() * allCandidates.length);
-    return allCandidates[idx];
-  };
-
-  const regions = [...new Set(allCandidates.map(c => c.region))];
+  // Legacy compat
+  const randomCandidate = () => allCandidates[Math.floor(Math.random() * allCandidates.length)];
 
   return {
     candidates: filtered,
-    search, setSearch,
-    genderFilter, setGenderFilter,
-    regionFilter, setRegionFilter,
-    partyFilter, setPartyFilter,
-    randomCandidate,
-    regions,
+    filters,
+    updateFilter,
+    resetFilters,
+    activeFilterCount: countActiveFilters(filters),
     totalCount: allCandidates.length,
+    randomCandidate,
+    // Legacy aliases still used by PeoplePage
+    search: filters.search,
+    setSearch: (v: string) => updateFilter('search', v),
   };
 }

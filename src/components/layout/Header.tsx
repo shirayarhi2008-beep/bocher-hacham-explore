@@ -1,12 +1,15 @@
 import { Link, useLocation } from 'react-router-dom';
+import { Sun, Moon } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { useTheme } from '@/contexts/ThemeContext';
 
 export default function Header({ onOpenFavorites: _onOpenFavorites }: { onOpenFavorites: () => void }) {
   const location = useLocation();
+  const { theme, toggleTheme } = useTheme();
 
   const navItems = [
     { label: 'מועמדים', path: '/people' },
     { label: 'רשימות', path: '/lists' },
-    { label: 'חקר', path: '/explore' },
   ];
 
   const isActive = (path: string) => location.pathname === path;
@@ -39,7 +42,22 @@ export default function Header({ onOpenFavorites: _onOpenFavorites }: { onOpenFa
           ))}
         </nav>
 
-        <div />
+        {/* Dark mode toggle */}
+        <motion.button
+          onClick={toggleTheme}
+          whileTap={{ scale: 0.85 }}
+          className="w-9 h-9 rounded-xl flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted transition-colors duration-200"
+          aria-label={theme === 'dark' ? 'מעבר למצב בהיר' : 'מעבר למצב כהה'}
+        >
+          <motion.div
+            key={theme}
+            initial={{ rotate: -30, opacity: 0 }}
+            animate={{ rotate: 0, opacity: 1 }}
+            transition={{ duration: 0.25 }}
+          >
+            {theme === 'dark' ? <Sun className="w-4 h-4" /> : <Moon className="w-4 h-4" />}
+          </motion.div>
+        </motion.button>
       </div>
     </header>
   );

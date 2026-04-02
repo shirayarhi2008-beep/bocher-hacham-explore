@@ -99,6 +99,7 @@ export default {
   			violet: 'hsl(var(--violet))',
   			teal: 'hsl(var(--teal))',
   			orange: 'hsl(var(--orange))',
+  			yellow: 'hsl(var(--yellow))',
   			sidebar: {
   				DEFAULT: 'hsl(var(--sidebar-background))',
   				foreground: 'hsl(var(--sidebar-foreground))',

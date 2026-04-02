@@ -1,10 +1,9 @@
 import { Link, useLocation } from 'react-router-dom';
-import { Users, List, Compass } from 'lucide-react';
+import { Users, List } from 'lucide-react';
 
 const items = [
   { icon: Users, label: 'מועמדים', path: '/people' },
   { icon: List, label: 'רשימות', path: '/lists' },
-  { icon: Compass, label: 'חקר', path: '/explore' },
 ];
 
 export default function MobileNav() {

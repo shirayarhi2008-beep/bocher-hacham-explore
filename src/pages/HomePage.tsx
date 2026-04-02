@@ -1,41 +1,9 @@
-import { useRef } from 'react';
-import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Users, BarChart3, Sparkles, ChevronLeft, ChevronDown } from 'lucide-react';
-import { parties } from '@/data/parties';
+import { ChevronDown } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export default function HomePage() {
-  const contentRef = useRef<HTMLDivElement>(null);
-
-  const scrollToContent = () => {
-    contentRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
-
-  const entryPoints = [
-    {
-      title: 'חקרו מועמדים',
-      description: 'גלו מי מתמודד — סננו לפי מגדר, אזור, מפלגה ועוד',
-      icon: Users,
-      path: '/people',
-      gradient: 'gradient-cool',
-    },
-    {
-      title: 'השוו רשימות',
-      description: 'בחרו מפלגות והשוו ביניהן בלחיצה',
-      icon: BarChart3,
-      path: '/lists',
-      gradient: 'gradient-fun',
-    },
-    {
-      title: 'מה חשוב לך?',
-      description: 'גלו תובנות על מגדר, גיל, השכלה ועוד',
-      icon: Sparkles,
-      path: '/explore',
-      gradient: 'gradient-warm',
-    },
-  ];
-
-  const topParties = [...parties].sort((a, b) => b.seats - a.seats).slice(0, 5);
+  const navigate = useNavigate();
 
   return (
     <div className="-mx-4 -mt-6">
@@ -79,12 +47,12 @@ export default function HomePage() {
         </motion.p>
 
         <motion.button
-          onClick={scrollToContent}
+          onClick={() => navigate('/people')}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ delay: 0.9 }}
           className="mt-12 relative z-10 group cursor-pointer"
-          aria-label="גלול למטה"
+          aria-label="עבור למועמדים"
         >
           <motion.div
             animate={{ y: [0, 8, 0] }}
@@ -95,39 +63,6 @@ export default function HomePage() {
         </motion.button>
       </motion.section>
 
-      {/* Dashboard */}
-      <div id="dashboard" ref={contentRef} className="px-4 pb-8 space-y-10 max-w-5xl mx-auto">
-        {/* Entry Points */}
-        <div className="space-y-3">
-          <h2 className="font-rubik font-bold text-xl">מאיפה מתחילים?</h2>
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {entryPoints.map((ep, i) => (
-              <motion.div
-                key={ep.path}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ delay: i * 0.1 }}
-                whileHover={{ y: -4, transition: { duration: 0.2 } }}
-              >
-                <Link to={ep.path}>
-                  <div className="bg-card rounded-2xl border border-border p-5 shadow-card hover:shadow-card-hover transition-all duration-300 group h-full">
-                    <div className={`w-12 h-12 rounded-xl ${ep.gradient} flex items-center justify-center mb-3 shadow-sm group-hover:scale-110 transition-transform duration-300`}>
-                      <ep.icon className="w-6 h-6 text-primary-foreground" />
-                    </div>
-                    <h3 className="font-rubik font-bold text-base mb-1">{ep.title}</h3>
-                    <p className="text-sm text-muted-foreground">{ep.description}</p>
-                    <div className="flex items-center gap-1 mt-3 text-primary text-sm font-medium">
-                      <span>גלו עכשיו</span>
-                      <ChevronLeft className="w-4 h-4" />
-                    </div>
-                  </div>
-                </Link>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </div>
     </div>
   );
 }
