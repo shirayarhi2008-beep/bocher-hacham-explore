@@ -1,209 +1,174 @@
 import { useState, useMemo, useRef, useCallback, useEffect } from 'react';
-import { Sparkles, SlidersHorizontal } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
-import CandidateCard from '@/components/CandidateCard';
-import FilterPanel, { ActiveFilterChips } from '@/components/FilterPanel';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import { useSearchParams } from 'react-router-dom';
 import { useFilteredCandidates } from '@/hooks/useFilteredCandidates';
 import { parties } from '@/data/parties';
+import CandidateCard from '@/components/CandidateCard';
+import FilterPanel, { ActiveFilterChips } from '@/components/FilterPanel';
 
 const PAGE_SIZE = 24;
 
-const SEARCH_HINTS = [
-  'חפש מועמד...',
-  'מי הח״כיות החדשות?',
-  'מועמדים עם ניסיון צבאי...',
-  'מי תומך בגיוס חרדים?',
-  'מועמדים ממחוז הצפון...',
-  'מי עוסק בחינוך?',
-];
-
-function useTypewriter(phrases: string[], typingSpeed = 70, pause = 2200) {
-  const [text, setText] = useState('');
-  const [phraseIdx, setPhraseIdx] = useState(0);
-  const [charIdx, setCharIdx] = useState(0);
-  const [deleting, setDeleting] = useState(false);
-
-  useEffect(() => {
-    const current = phrases[phraseIdx];
-    let timeout: ReturnType<typeof setTimeout>;
-
-    if (!deleting && charIdx < current.length) {
-      timeout = setTimeout(() => setCharIdx(i => i + 1), typingSpeed);
-    } else if (!deleting && charIdx === current.length) {
-      timeout = setTimeout(() => setDeleting(true), pause);
-    } else if (deleting && charIdx > 0) {
-      timeout = setTimeout(() => setCharIdx(i => i - 1), typingSpeed / 2);
-    } else if (deleting && charIdx === 0) {
-      setDeleting(false);
-      setPhraseIdx(i => (i + 1) % phrases.length);
-    }
-
-    return () => clearTimeout(timeout);
-  }, [charIdx, deleting, phraseIdx, phrases, typingSpeed, pause]);
-
-  useEffect(() => {
-    setText(phrases[phraseIdx].slice(0, charIdx));
-  }, [charIdx, phraseIdx, phrases]);
-
-  return text;
-}
-
 export default function PeoplePage() {
-  const [sidebarOpen, setSidebarOpen] = useState(true);
+  const [searchParams] = useSearchParams();
   const {
     candidates, filters, updateFilter, resetFilters,
     activeFilterCount, totalCount, search, setSearch,
   } = useFilteredCandidates();
 
-  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
-  const [inputFocused, setInputFocused] = useState(false);
-  const observer = useRef<IntersectionObserver>();
+  // Initialize search from URL param once on mount (e.g. /people?q=גלנט)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const q = searchParams.get('q');
+    if (q) setSearch(q);
+  }, [searchParams.get('q')]);
 
-  const animatedPlaceholder = useTypewriter(SEARCH_HINTS);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+  const observer = useRef<IntersectionObserver>();
 
   const lastCardRef = useCallback((node: HTMLDivElement | null) => {
     if (observer.current) observer.current.disconnect();
     observer.current = new IntersectionObserver(entries => {
-      if (entries[0].isIntersecting) setVisibleCount(prev => Math.min(prev + PAGE_SIZE, candidates.length));
+      if (entries[0].isIntersecting) setVisibleCount(p => Math.min(p + PAGE_SIZE, candidates.length));
     });
     if (node) observer.current.observe(node);
   }, [candidates.length]);
 
-  // reset pagination when filters change
   useEffect(() => { setVisibleCount(PAGE_SIZE); }, [candidates.length]);
 
   const visible = useMemo(() => candidates.slice(0, visibleCount), [candidates, visibleCount]);
 
+  const PARTY_COLORS = ['#2952d9', '#5982fe', '#50bab6', '#88b12d', '#fa8501', '#f9bc01'];
+
+  // Group visible candidates by party, preserving order of first appearance
+  const grouped = useMemo(() => {
+    const map = new Map<string, { name: string; color: string; members: typeof visible }>();
+    let colorIdx = 0;
+    visible.forEach(c => {
+      if (!map.has(c.partyId)) {
+        map.set(c.partyId, {
+          name: c.party,
+          color: PARTY_COLORS[colorIdx++ % PARTY_COLORS.length],
+          members: [],
+        });
+      }
+      map.get(c.partyId)!.members.push(c);
+    });
+    return [...map.values()];
+  }, [visible]);
+
   return (
     <div className="space-y-5">
+      {/* Header */}
+      <div>
+        <h1 className="font-bold text-2xl md:text-3xl text-foreground">מועמדים</h1>
+        <p className="text-muted-foreground text-sm mt-1">
+          {totalCount} מועמדים מ-{parties.length} מפלגות
+        </p>
+      </div>
 
-      {/* Page header */}
-      <motion.div initial={{ opacity: 0, y: -10 }} animate={{ opacity: 1, y: 0 }}>
-        <h1 className="font-rubik font-bold text-2xl md:text-3xl text-gradient-primary">מועמדים</h1>
-        <p className="text-muted-foreground text-sm mt-1">{totalCount} מועמדים מ-{parties.length} מפלגות</p>
-      </motion.div>
-
-      {/* AI Search bar */}
-      <motion.div
-        initial={{ opacity: 0, y: 8 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.1 }}
-        className="relative"
-      >
-        {/* Glow ring when focused */}
-        <AnimatePresence>
-          {inputFocused && (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="absolute -inset-0.5 rounded-2xl bg-gradient-to-l from-violet/30 via-primary/20 to-cyan-400/30 blur-sm pointer-events-none"
-            />
-          )}
-        </AnimatePresence>
-
-        <div className="relative flex items-center bg-card border border-border rounded-2xl shadow-card overflow-hidden">
-          {/* AI icon */}
-          <div className="flex items-center gap-1.5 px-3 border-l border-border shrink-0 h-12">
-            <Sparkles className="w-4 h-4 text-violet" />
-            <span className="text-xs font-semibold text-violet hidden sm:inline">AI</span>
-          </div>
-
+      {/* Search row */}
+      <div className="flex items-center gap-2">
+        <div className="relative flex-1">
+          <Search className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground pointer-events-none" />
           <input
             value={search}
             onChange={e => setSearch(e.target.value)}
-            onFocus={() => setInputFocused(true)}
-            onBlur={() => setInputFocused(false)}
-            placeholder={inputFocused ? '' : animatedPlaceholder}
-            className="flex-1 h-12 px-3 bg-transparent text-sm outline-none placeholder:text-muted-foreground/60 text-right"
+            placeholder="חיפוש לפי שם, מפלגה, תחום..."
+            className="w-full h-10 pr-9 pl-3 bg-white border border-border rounded-md text-sm outline-none focus:border-primary transition-colors duration-fast placeholder:text-muted-foreground/60"
           />
-
-          {/* Animated cursor when no text typed */}
-          {!search && !inputFocused && (
-            <span className="absolute left-4 top-1/2 -translate-y-1/2 w-0.5 h-4 bg-muted-foreground/40 animate-pulse" />
-          )}
-
-          {/* Filter toggle (mobile) */}
-          <button
-            onClick={() => setSidebarOpen(o => !o)}
-            className={`md:hidden flex items-center gap-1.5 px-3 border-r border-border h-12 text-sm shrink-0 transition-colors ${
-              sidebarOpen || activeFilterCount > 0 ? 'text-primary' : 'text-muted-foreground'
-            }`}
-          >
-            <SlidersHorizontal className="w-4 h-4" />
-            {activeFilterCount > 0 && (
-              <span className="w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
-                {activeFilterCount}
-              </span>
-            )}
-          </button>
-        </div>
-      </motion.div>
-
-      {/* Body: sidebar (right) + results (left) */}
-      <div className="flex gap-6 items-start">
-
-        {/* Filter sidebar — right side in RTL */}
-        <AnimatePresence>
-          {sidebarOpen && (
-            <motion.aside
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              transition={{ duration: 0.2 }}
-              className="w-64 shrink-0 sticky top-20 bg-card border border-border rounded-2xl p-4 shadow-card hidden md:block"
+          {search && (
+            <button
+              onClick={() => setSearch('')}
+              className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
             >
-              <FilterPanel filters={filters} onChange={updateFilter} onReset={resetFilters} />
-            </motion.aside>
+              <X className="w-3.5 h-3.5" />
+            </button>
           )}
-        </AnimatePresence>
+        </div>
 
-        {/* Results column */}
+        {/* Filter toggle — mobile only */}
+        <button
+          onClick={() => setSidebarOpen(o => !o)}
+          className={`md:hidden h-10 px-3 flex items-center gap-1.5 border rounded-md text-sm transition-colors duration-fast ${
+            activeFilterCount > 0
+              ? 'border-primary text-primary bg-primary/5'
+              : sidebarOpen
+                ? 'border-primary-light text-primary-light bg-primary-light/5'
+                : 'border-border text-muted-foreground hover:text-foreground'
+          }`}
+        >
+          <SlidersHorizontal className="w-4 h-4" />
+          {activeFilterCount > 0 && (
+            <span className="w-4 h-4 rounded-full bg-primary text-white text-[10px] font-bold flex items-center justify-center">
+              {activeFilterCount}
+            </span>
+          )}
+        </button>
+      </div>
+
+      {/* Mobile filter panel — inline, not absolute */}
+      {sidebarOpen && (
+        <div className="md:hidden bg-white border border-border rounded-lg p-4 shadow-card">
+          <FilterPanel filters={filters} onChange={updateFilter} onReset={resetFilters} />
+        </div>
+      )}
+
+      {/* Body: sidebar + results */}
+      <div className="flex gap-6 items-start">
+        {/* Desktop sidebar */}
+        <aside className="w-60 shrink-0 sticky top-20 hidden md:block">
+          <div className="bg-white border border-border rounded-lg p-4 shadow-card">
+            <FilterPanel filters={filters} onChange={updateFilter} onReset={resetFilters} />
+          </div>
+        </aside>
+
+        {/* Results */}
         <div className="flex-1 min-w-0 space-y-4">
-
-          {/* Active chips */}
           <ActiveFilterChips filters={filters} onChange={updateFilter} onReset={resetFilters} />
 
-          {/* Count */}
           <p className="text-sm text-muted-foreground">
-            {candidates.length === totalCount ? `${candidates.length} מועמדים` : `${candidates.length} תוצאות`}
+            {candidates.length === totalCount
+              ? `${candidates.length} מועמדים`
+              : `${candidates.length} תוצאות`}
           </p>
 
-          {/* Grid */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4">
-            {visible.map((c, i) => (
-              <div key={c.id} ref={i === visible.length - 1 ? lastCardRef : undefined}>
-                <CandidateCard candidate={c} index={i} />
+          <div className="space-y-8">
+            {grouped.map((group, gi) => (
+              <div key={group.name}>
+                {/* Party header */}
+                <div className="flex items-center gap-2 mb-3">
+                  <span className="w-3 h-3 rounded-full shrink-0" style={{ backgroundColor: group.color }} />
+                  <span className="font-semibold text-sm text-foreground">{group.name}</span>
+                  <span className="text-xs text-muted-foreground">({group.members.length})</span>
+                </div>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-3">
+                  {group.members.map((c, ci) => {
+                    const isLast = gi === grouped.length - 1 && ci === group.members.length - 1;
+                    return (
+                      <div key={c.id} ref={isLast ? lastCardRef : undefined}>
+                        <CandidateCard candidate={c} accentColor={group.color} />
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
             ))}
           </div>
 
           {candidates.length === 0 && (
             <div className="text-center py-16">
-              <p className="text-muted-foreground text-lg">לא נמצאו מועמדים</p>
-              <Button variant="link" onClick={resetFilters}>נקה סינונים</Button>
+              <p className="text-muted-foreground">לא נמצאו מועמדים</p>
+              <button
+                onClick={resetFilters}
+                className="mt-2 text-sm text-primary hover:underline"
+              >
+                נקה סינונים
+              </button>
             </div>
           )}
         </div>
-
-        {/* Mobile: filter panel slides in below search (full-width) */}
-        <AnimatePresence>
-          {sidebarOpen && (
-            <motion.div
-              initial={{ height: 0, opacity: 0 }}
-              animate={{ height: 'auto', opacity: 1 }}
-              exit={{ height: 0, opacity: 0 }}
-              className="md:hidden w-full overflow-hidden absolute right-4 left-4 z-40 top-[calc(theme(spacing.5)*3+theme(spacing.12)+theme(spacing.12))]"
-            >
-              <div className="bg-card border border-border rounded-2xl p-4 shadow-xl">
-                <FilterPanel filters={filters} onChange={updateFilter} onReset={resetFilters} />
-              </div>
-            </motion.div>
-          )}
-        </AnimatePresence>
-
       </div>
     </div>
   );

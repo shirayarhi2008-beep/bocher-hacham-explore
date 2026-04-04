@@ -59,13 +59,12 @@ export function useFilteredCandidates() {
     if (filters.search) {
       const q = filters.search.toLowerCase();
       result = result.filter(c =>
-        c.name.includes(filters.search) ||
-        c.party.includes(filters.search) ||
-        c.profession?.includes(filters.search) ||
-        c.ticket1?.includes(filters.search) ||
-        c.ticket2?.includes(filters.search)
+        c.name.toLowerCase().includes(q) ||
+        c.party.toLowerCase().includes(q) ||
+        c.profession?.toLowerCase().includes(q) ||
+        c.ticket1?.toLowerCase().includes(q) ||
+        c.ticket2?.toLowerCase().includes(q)
       );
-      void q;
     }
 
     if (filters.orientation !== 'all') {

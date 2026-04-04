@@ -1,74 +1,170 @@
-# CLAUDE.md
+# 🗂️ PROJECT CONTEXT — בוחרים ח"כם
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+> קובץ זה הוא מקור האמת של הפרויקט.
+> יש לעדכן אותו בכל שינוי משמעותי בהחלטות מוצר, טכנולוגיה, או עיצוב.
+> קלוד קוד קורא קובץ זה אוטומטית. בשאר הכלים — יש לצרף בתחילת כל שיחה.
+> קרא גם את `designSystem.md` לפני כל עבודה עיצובית.
 
-## Project Overview
+---
 
-**בוחר חכם (Bocher Hacham)** — An Israeli voter research platform. A Hebrew RTL web app helping Israeli voters explore, compare, and research Knesset candidates and party lists through interactive visualizations and smart filtering. All UI text is in Hebrew with full RTL layout.
+## 🎯 מהו הפרויקט
 
-## Commands
+**בוחרים ח"כם** הוא פרויקט עצמאי, א-מפלגתי, שמטרתו להנגיש מידע אמין ומובנה על חברי הכנסת לקראת הבחירות הארציות.
 
-```bash
-# Development
-bun run dev          # Start dev server (Vite)
-bun run build        # Production build
-bun run lint         # ESLint
-bun run test         # Run tests once (Vitest)
-bun run test:watch   # Watch mode for tests
+הפרויקט פועל נגד עומס המידע והשיח הפופוליסטי — ומציע במקומם מידע ברור, מבוסס קריטריונים, שעוזר לאזרחים לבחור בצורה מושכלת.
+
+---
+
+## 👥 קהל יעד
+
+- מתלבטים ומתנדנדים שמרגישים הצפת מידע
+- אחראים, רוצים לבחור נכון, לא נופלים לשיח רגשי/פופוליסטי
+- בעלי אוריינטציה בסיסית — לא מתחילים, לא אקטיביסטים
+- מחפשים עובדות, לא חיזוק לדעה קיימת
+
+---
+
+## 💡 4 ישויות הליבה
+
+אלו ארבעת הדברים הקריטיים שבלעדיהם האתר לא קיים. **הכל נבנה סביבם.**
+
+| ישות                      | תיאור                             | Route                     |
+| ------------------------- | --------------------------------- | ------------------------- |
+| רשימת מפלגות              | כל המפלגות המתמודדות              | `/`                       |
+| תז"מ — תעודת זהות מפלגתית | אידיאולוגיה, עמדות, רשימת מועמדים | `/parties/:id`            |
+| רשימת מועמדים             | מועמדי המפלגה לפי מיקום           | `/parties/:id/candidates` |
+| תז"א — תעודת זהות אישית   | ביו, הצבעות, עמדות, מקורות        | `/candidates/:id`         |
+
+> זרימת המשתמש: דף בית ← מפלגה ← רשימת מועמדים ← מועמד — **או** חיפוש ישיר.
+> תז"א הוא **עמוד עצמאי עם URL** — לא modal, לא drawer, לא popup.
+
+---
+
+## 🧭 ניווט
+
+```
+לוגו  |  מפלגות  |  🔍 חיפוש
 ```
 
-## Architecture
+- שלושה פריטים בלבד — אין "רשימות" ו"מועמדים" כפריטים נפרדים
+- עמוד "כל המועמדים" קיים אך **לא** בניווט הראשי — נגיש דרך חיפוש בלבד
 
-**Stack:** React 18 + TypeScript + Vite + Tailwind CSS + shadcn/ui + React Router v6 + TanStack Query + Framer Motion + Recharts
+---
 
-### Routing (src/App.tsx)
-All routes are wrapped in `AppLayout` (header + mobile nav + favorites drawer):
-- `/` → `HomePage` — hero + onboarding quiz + entry points
-- `/people` → `PeoplePage` — candidate grid with filters
-- `/lists` → `ListsPage` — party cards with comparison
-- `/lists/:id` → `PartyDetailPage`
-- `/explore` → `ExplorePage` — category landing
-- `/explore/:key` → `CategoryDetailPage` — charts & rankings per category
-- `/mockups` → `MockupPage`
+## 🏗️ סטאק טכנולוגי
 
-### Data Layer (src/data/)
-All data is static mock data — no backend or API calls:
-- `types.ts` — `Candidate`, `Party`, `CategoryKey`, `CategoryInfo` interfaces
-- `candidates.ts` — ~120 mock candidates with Hebrew names, parties, regions, etc.
-- `parties.ts` — party list with stats (seats, gender ratio, avg age, education)
-- `categories.ts` — 6 explore categories: `gender | periphery | professionalism | education | age | seniority`
+| שכבה            | טכנולוגיה                              |
+| --------------- | -------------------------------------- |
+| Frontend        | React 18 + TypeScript + Vite           |
+| Styling         | Tailwind CSS + shadcn/ui               |
+| Routing         | React Router v6                        |
+| Data fetching   | TanStack Query                         |
+| Animation       | Framer Motion — **שימוש מינימלי בלבד** |
+| Charts          | Recharts — שלב 2 בלבד                  |
+| Testing         | Vitest + Testing Library               |
+| Package manager | Bun                                    |
+| Backend         | אין כרגע — mock data סטטי              |
+| DB עתידי        | Supabase (המבנה תוכנן לכך)             |
+| Hosting         | Vercel                                 |
 
-Data is structured for easy future migration to Supabase.
+---
 
-### State Management
-- **Favorites** — `useFavorites` hook → `FavoritesContext` → persisted in `localStorage` under key `bocher-hacham-favorites`
-- **Filtered candidates** — `useFilteredCandidates` hook encapsulates search + gender/region/party filters with `useMemo`
-- No global state library; context is used only for favorites
+## ⌨️ פקודות פיתוח
 
-### Layout (src/components/layout/)
-- `AppLayout` — shell with `<Outlet>`, manages favorites drawer open state
-- `Header` — sticky, logo + nav links + favorites badge + share menu
-- `MobileNav` — bottom nav bar (mobile only)
-- `FavoritesDrawer` — right-side drawer for saved candidates
+```bash
+bun run dev        # שרת פיתוח
+bun run build      # build לפרודקשן
+bun run lint       # ESLint
+bun run test       # טסטים
+bun run test:watch # טסטים במצב watch
+```
 
-### UI Components
-- `src/components/ui/` — shadcn/ui primitives (do not edit manually; regenerate via shadcn CLI)
-- `src/components/` — app-specific: `CandidateCard`, `CandidateModal`, `ComparisonModal`, `PartyCard`, `IsraelMap`
+---
 
-## Design System
+## 🗂️ מבנה קוד
 
-The design is intentionally **vibrant and playful** (Duolingo-meets-data-viz aesthetic) — NOT minimalist. Key conventions:
-- Primary font: `font-rubik` for headings/bold text; `font-heebo` for body
-- Custom gradient classes: `gradient-cool`, `gradient-warm`, `gradient-fun` (defined in `index.css`)
-- Custom shadow classes: `shadow-card`, `shadow-card-hover`, `shadow-glow`
-- Custom color tokens: `--coral`, `--amber`, `--emerald`, `--sky`, `--rose`, `--violet`, `--teal`
-- Framer Motion for all transitions: cards lift on hover, staggered list animations, 300–400ms durations
-- All text/layout is RTL; use `text-right`, `dir="rtl"`, and RTL-aware flex ordering
+```
+src/
+├── App.tsx                  # routing — כל routes עטופות ב-AppLayout
+├── data/
+│   ├── types.ts             # Candidate, Party interfaces
+│   ├── candidates.ts        # mock candidates
+│   └── parties.ts           # mock parties
+├── components/
+│   ├── layout/              # AppLayout, Header, MobileNav
+│   ├── ui/                  # shadcn/ui — לא לערוך ידנית, רק CLI
+│   └── [app components]     # CandidateCard, PartyCard וכו'
+└── test/
+```
 
-## Key Conventions
+### קונבנציות קוד
 
-- Path alias `@/` maps to `src/`
-- The homepage quiz can be skipped; state persisted in `localStorage` under key `skip-homepage-quiz`
-- `PeoplePage` implements infinite scroll via `IntersectionObserver` with page size 24
-- `ComparisonModal` supports comparing exactly 2 parties side-by-side
-- Tests live in `src/test/` using Vitest + Testing Library; setup in `src/test/setup.ts`
+- Path alias: `@/` → `src/`
+- כל טקסט/layout: RTL — `text-right`, `dir="rtl"`
+- shadcn: רק דרך CLI — לא לערוך ידנית
+
+---
+
+## 🎨 עיצוב
+
+ראה `designSystem.md` — מקור האמת העיצובי.
+
+עקרונות מרכזיים:
+
+- **מינימליזם** — כל אלמנט ללא תפקיד — מוסר
+- **ניטרליות פוליטית** — אין צבעי מפלגות, אין רמזים פוליטיים
+- **RTL ראשי** — עברית/ערבית. LTR הוא adaptation
+- **Mobile-first** — מתחילים מ-375px
+- **Heebo בלבד** — אין Rubik, אין ערבוב פונטים
+
+> ⚠️ הקוד הקיים השתמש ב-"vibrant and playful" עם Framer Motion מורחב וצבעים רבים.
+> **הכיוון החדש: מינימליסטי לחלוטין.** ראה designSystem.md.
+
+---
+
+## ✅ עקרונות מוצר
+
+1. **א-מפלגתי לחלוטין** — עובדות בלבד, ללא הטיה
+2. **מקורות תמיד** — כל מידע מקושר למקור, אין מידע "עירום"
+3. **פשטות על שלמות** — פחות מידע מדויק עדיף על הרבה מידע בעייתי
+4. **נגישות** — WCAG AA מינימום, עובד עם קוראי מסך
+5. **איטרטיביות** — כל פיצ'ר חדש עובר ולידציה עם משתמשים לפני פיתוח
+
+---
+
+## 🚫 מה לא לבנות ב-MVP
+
+> כל פיצ'ר שאינו ברשימת הליבה — **אסור לבנות** ללא ולידציה.
+> ראה `CONTRIBUTING.md` לתהליך המלא.
+
+- מועדפים / שמירת מועמדים
+- השוואה בין מועמדים או מפלגות
+- גרפים סטטיסטיים (גיל, מגדר, פריפריה)
+- שאלון התאמה
+- מערכת לוגין
+- תגובות / UGC
+- פרסומות
+
+---
+
+## 📝 לוג החלטות
+
+| החלטה                                      | סיבה                                    |
+| ------------------------------------------ | --------------------------------------- |
+| 4 ישויות ליבה: מפלגות, תז"מ, מועמדים, תז"א | הזרימה המלאה שבלעדיה האתר לא קיים       |
+| ניווט: מפלגות כנקודת פתיחה                 | קהל מתלבט — צריך הכוונה, לא בחירה טכנית |
+| תז"א = עמוד עצמאי עם URL                   | שיתוף, גוגל, UX נכון לישות מרכזית       |
+| תז"א = פרופיל אישי וחם, תמונה בולטת        | המשתמש מכיר אדם, לא קורא דוח            |
+| הסרת מועדפים מ-MVP                         | לא ולידטנו ביקוש                        |
+| הסרת השוואה מ-MVP                          | לא ולידטנו ביקוש, מורכבות גבוהה         |
+| אין צבעי מפלגות                            | ניטרליות פוליטית                        |
+| דירוג פעילות פרלמנטרית = שלב 2             | אין נתונים מסודרים כרגע                 |
+
+---
+
+## 🔄 איך לעדכן קובץ זה
+
+- החלטת מוצר חדשה → הוסף ל-Decision Log
+- פיצ'ר חדש → עבור תהליך ב-`CONTRIBUTING.md` קודם
+- שינוי טכנולוגי → עדכן סטאק
+- לפני כל session עם AI → ודא שהקובץ מעודכן

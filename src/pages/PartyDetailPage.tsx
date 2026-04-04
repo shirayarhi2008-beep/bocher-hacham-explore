@@ -1,283 +1,189 @@
-import { useState, useEffect } from 'react';
-import { useParams, Link, useNavigate, useSearchParams } from 'react-router-dom';
-import { motion } from 'framer-motion';
-import { ChevronRight, Users, GraduationCap, Calendar, Clock, Scale, ArrowLeft } from 'lucide-react';
+import { useParams, Link, useNavigate } from 'react-router-dom';
+import { ChevronRight, Users, Calendar, Clock, GraduationCap } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
-import { getPartyById, parties } from '@/data/parties';
+import { getPartyById } from '@/data/parties';
 import { getCandidatesByParty } from '@/data/candidates';
-import { Button } from '@/components/ui/button';
-import CandidateCard from '@/components/CandidateCard';
 import IsraelMap from '@/components/IsraelMap';
-import ComparisonModal from '@/components/ComparisonModal';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+
+const CHART_COLORS = ['#2952d9', '#5982fe', '#50bab6', '#88b12d', '#fa8501', '#f9bc01'];
 
 export default function PartyDetailPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const party = getPartyById(id || '');
-  const candidates = getCandidatesByParty(id || '');
-
-  // Comparison state
-  const [comparePartyId, setComparePartyId] = useState<string>('');
-  const [compareOpen, setCompareOpen] = useState(false);
+  const party = getPartyById(id ?? '');
+  const candidates = getCandidatesByParty(id ?? '');
 
   if (!party) {
     return (
       <div className="text-center py-20">
-        <p className="text-muted-foreground text-lg">מפלגה לא נמצאה</p>
-        <Button variant="link" onClick={() => navigate('/lists')}>חזרה לרשימות</Button>
+        <p className="text-muted-foreground">מפלגה לא נמצאה</p>
+        <button onClick={() => navigate('/lists')} className="mt-3 text-sm text-primary hover:underline">
+          חזרה למפלגות
+        </button>
       </div>
     );
   }
 
-  // Gender data
+  // Gender chart data
   const femaleCount = candidates.filter(c => c.gender === 'female').length;
   const maleCount = candidates.filter(c => c.gender === 'male').length;
   const genderData = [
-    { name: 'נשים', value: femaleCount, color: 'hsl(340, 80%, 55%)' },
-    { name: 'גברים', value: maleCount, color: 'hsl(200, 85%, 55%)' },
+    { name: 'נשים', value: femaleCount },
+    { name: 'גברים', value: maleCount },
   ];
-
-  // Education data
-  const eduMap: Record<string, number> = {};
-  candidates.forEach(c => { eduMap[c.education] = (eduMap[c.education] || 0) + 1; });
-  const educationData = Object.entries(eduMap)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value);
 
   // Age distribution
   const ageBuckets = [
-    { label: '28-35', min: 28, max: 35 },
-    { label: '36-45', min: 36, max: 45 },
-    { label: '46-55', min: 46, max: 55 },
-    { label: '56-65', min: 56, max: 65 },
-    { label: '66+', min: 66, max: 100 },
+    { label: '28–35', min: 28, max: 35 },
+    { label: '36–45', min: 36, max: 45 },
+    { label: '46–55', min: 46, max: 55 },
+    { label: '56–65', min: 56, max: 65 },
+    { label: '66+',   min: 66, max: 100 },
   ];
   const ageData = ageBuckets.map(b => ({
     name: b.label,
     value: candidates.filter(c => c.age >= b.min && c.age <= b.max).length,
   }));
 
-  // Region data for map
+  // Education breakdown
+  const eduMap: Record<string, number> = {};
+  candidates.forEach(c => { eduMap[c.education] = (eduMap[c.education] || 0) + 1; });
+  const educationData = Object.entries(eduMap)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+
+  // Region data
   const regionMap: Record<string, number> = {};
   candidates.forEach(c => { regionMap[c.region] = (regionMap[c.region] || 0) + 1; });
   const regionData = Object.entries(regionMap)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
 
-  const PIE_COLORS = ['hsl(340, 80%, 55%)', 'hsl(200, 85%, 55%)', 'hsl(160, 70%, 45%)', 'hsl(270, 75%, 60%)', 'hsl(38, 95%, 55%)', 'hsl(12, 90%, 65%)'];
-
-  const statCards = [
-    { icon: Users, label: 'מועמדים', value: candidates.length },
-    { icon: Calendar, label: 'גיל ממוצע', value: party.avgAge },
-    { icon: Clock, label: 'ותק ממוצע', value: `${party.avgSeniority} שנים` },
-    { icon: GraduationCap, label: '% אקדמאים', value: `${party.educationBreakdown.academic}%` },
-  ];
-
-  const otherParties = parties.filter(p => p.id !== party.id);
-  const compareParties = comparePartyId ? [party, getPartyById(comparePartyId)!].filter(Boolean) : [];
-
-  const handleCompareClick = () => {
-    if (!comparePartyId) return;
-    setCompareOpen(true);
-  };
-
   return (
     <div className="space-y-8 pb-8">
       {/* Breadcrumb */}
-      <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Link to="/lists" className="hover:text-foreground transition-colors">רשימות</Link>
-        <ChevronRight className="w-4 h-4 rotate-180" />
+      <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
+        <Link to="/lists" className="hover:text-foreground transition-colors">מפלגות</Link>
+        <ChevronRight className="w-3.5 h-3.5 rotate-180" />
         <span className="text-foreground font-medium">{party.name}</span>
-      </motion.div>
+      </nav>
 
-      {/* Party Header */}
-      <motion.div
-        initial={{ opacity: 0, y: -15 }}
-        animate={{ opacity: 1, y: 0 }}
-        className="bg-card rounded-2xl border border-border p-6 shadow-card relative overflow-hidden"
-      >
-        <div className="absolute top-0 left-0 right-0 h-2" style={{ backgroundColor: party.color }} />
+      {/* Party header */}
+      <div className="bg-white border border-border rounded-lg p-6">
         <div className="flex items-center gap-4">
-          <div
-            className="w-16 h-16 rounded-2xl flex items-center justify-center text-white font-bold text-xl shadow-md"
-            style={{ backgroundColor: party.color }}
-          >
-            {party.name.slice(0, 2)}
-          </div>
           <div>
-            <h1 className="font-rubik font-bold text-2xl md:text-3xl">{party.name}</h1>
-            <p className="text-muted-foreground text-sm mt-1">{party.seats} מנדטים · {candidates.length} מועמדים ברשימה</p>
+            <h1 className="font-bold text-2xl md:text-3xl text-foreground">{party.name}</h1>
+            <p className="text-muted-foreground text-sm mt-0.5">{party.seats} מנדטים · {candidates.length} מועמדים ברשימה</p>
           </div>
         </div>
-      </motion.div>
+      </div>
 
-      {/* Stat Cards */}
+      {/* Stat highlights */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-        {statCards.map((stat, i) => (
-          <motion.div
-            key={stat.label}
-            initial={{ opacity: 0, y: 15 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.08 }}
-            className="bg-card rounded-xl border border-border p-4 text-center shadow-card"
-          >
-            <stat.icon className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
-            <p className="font-bold text-lg" style={{ color: party.color }}>{stat.value}</p>
+        {[
+          { icon: Users,         label: 'מועמדים',    value: candidates.length },
+          { icon: Calendar,      label: 'גיל ממוצע',  value: party.avgAge },
+          { icon: Clock,         label: 'ותק ממוצע',  value: `${party.avgSeniority} שנים` },
+          { icon: GraduationCap, label: '% אקדמאים',  value: `${party.educationBreakdown.academic}%` },
+        ].map(stat => (
+          <div key={stat.label} className="bg-white border border-border rounded-lg p-4 text-center">
+            <stat.icon className="w-4 h-4 mx-auto mb-2 text-muted-foreground" />
+            <p className="font-bold text-lg text-primary-light">{stat.value}</p>
             <p className="text-xs text-muted-foreground">{stat.label}</p>
-          </motion.div>
+          </div>
         ))}
       </div>
 
-      {/* Charts Section */}
+      {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Gender Pie */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-card"
-        >
-          <h3 className="font-rubik font-bold text-lg mb-4">התפלגות מגדרית</h3>
-          <ResponsiveContainer width="100%" height={220}>
+        {/* Gender */}
+        <div className="bg-white border border-border rounded-lg p-5">
+          <h3 className="font-semibold text-base mb-4">התפלגות מגדרית</h3>
+          <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={genderData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={4} dataKey="value" animationDuration={800}>
-                {genderData.map((entry, i) => <Cell key={i} fill={entry.color} stroke="none" />)}
+              <Pie data={genderData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={4} dataKey="value">
+                {genderData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i]} />)}
               </Pie>
-              <Tooltip formatter={(value: number) => [`${value} מועמדים`, '']} />
+              <Tooltip formatter={(v: number) => [`${v} מועמדים`, '']} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex justify-center gap-6 mt-2">
-            {genderData.map(d => (
-              <div key={d.name} className="flex items-center gap-2 text-sm">
-                <div className="w-3 h-3 rounded-full" style={{ backgroundColor: d.color }} />
-                <span>{d.name} ({d.value})</span>
-              </div>
+          <div className="flex justify-center gap-5 mt-1">
+            {genderData.map((d, i) => (
+              <span key={d.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+                <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CHART_COLORS[i] }} />
+                {d.name} ({d.value})
+              </span>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Age Distribution Bar */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.3 }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-card"
-        >
-          <h3 className="font-rubik font-bold text-lg mb-4">התפלגות גילאים</h3>
-          <ResponsiveContainer width="100%" height={220}>
-            <BarChart data={ageData}>
-              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" />
-              <XAxis dataKey="name" tick={{ fontSize: 12 }} />
-              <YAxis tick={{ fontSize: 12 }} />
-              <Tooltip formatter={(value: number) => [`${value} מועמדים`, '']} />
-              <Bar dataKey="value" fill={party.color} radius={[6, 6, 0, 0]} animationDuration={800} />
+        {/* Age */}
+        <div className="bg-white border border-border rounded-lg p-5">
+          <h3 className="font-semibold text-base mb-4">התפלגות גילאים</h3>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={ageData} barCategoryGap="30%">
+              <CartesianGrid strokeDasharray="3 3" stroke="hsl(var(--border))" vertical={false} />
+              <XAxis dataKey="name" tick={{ fontSize: 11 }} axisLine={false} tickLine={false} />
+              <YAxis tick={{ fontSize: 11 }} axisLine={false} tickLine={false} width={24} />
+              <Tooltip formatter={(v: number) => [`${v} מועמדים`, '']} />
+              <Bar dataKey="value" fill="#2952d9" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
-        </motion.div>
+        </div>
 
-        {/* Education Pie */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-card"
-        >
-          <h3 className="font-rubik font-bold text-lg mb-4">רמת השכלה</h3>
-          <ResponsiveContainer width="100%" height={220}>
+        {/* Education */}
+        <div className="bg-white border border-border rounded-lg p-5">
+          <h3 className="font-semibold text-base mb-4">רמת השכלה</h3>
+          <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={educationData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={3} dataKey="value" animationDuration={800}>
-                {educationData.map((_, i) => <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} stroke="none" />)}
+              <Pie data={educationData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3} dataKey="value">
+                {educationData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
               </Pie>
-              <Tooltip formatter={(value: number, name: string) => [`${value}`, name]} />
+              <Tooltip formatter={(v: number, name: string) => [v, name]} />
             </PieChart>
           </ResponsiveContainer>
-          <div className="flex flex-wrap justify-center gap-3 mt-2">
+          <div className="flex flex-wrap justify-center gap-2 mt-1">
             {educationData.slice(0, 4).map((d, i) => (
-              <div key={d.name} className="flex items-center gap-1.5 text-xs">
-                <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: PIE_COLORS[i % PIE_COLORS.length] }} />
-                <span>{d.name} ({d.value})</span>
-              </div>
+              <span key={d.name} className="flex items-center gap-1 text-xs text-muted-foreground">
+                <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                {d.name} ({d.value})
+              </span>
             ))}
           </div>
-        </motion.div>
+        </div>
 
-        {/* Israel Map — Geographic distribution */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-          className="bg-card rounded-2xl border border-border p-5 shadow-card"
-        >
-          <h3 className="font-rubik font-bold text-lg mb-4">פריסה גיאוגרפית</h3>
-          <IsraelMap data={regionData} color={party.color} candidates={candidates} />
-        </motion.div>
+        {/* Map */}
+        <div className="bg-white border border-border rounded-lg p-5">
+          <h3 className="font-semibold text-base mb-4">פריסה גיאוגרפית</h3>
+          <IsraelMap data={regionData} color="#2952d9" candidates={candidates} />
+        </div>
       </div>
 
-      {/* Candidates List */}
-      <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }}>
-        <h2 className="font-rubik font-bold text-xl mb-4">מועמדי הרשימה</h2>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {candidates.map((c, i) => (
-            <CandidateCard key={c.id} candidate={c} index={i} />
+      {/* Candidates — vertical list per design system */}
+      <div>
+        <h2 className="font-bold text-xl mb-4">מועמדי הרשימה</h2>
+        <div className="border border-border rounded-lg overflow-hidden bg-white divide-y divide-border">
+          {candidates.map(c => (
+            <Link
+              key={c.id}
+              to={`/candidates/${c.id}`}
+              className="flex items-center gap-3 px-4 py-3 hover:bg-secondary transition-colors duration-normal group"
+            >
+              <span className="text-xs font-semibold text-muted-foreground w-6 text-center shrink-0">
+                {c.listPosition}
+              </span>
+              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
+                {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="font-medium text-sm text-foreground">{c.name}</p>
+                <p className="text-xs text-muted-foreground truncate">{c.profession || c.party}</p>
+              </div>
+              <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary transition-colors shrink-0 rotate-180" />
+            </Link>
           ))}
         </div>
-      </motion.div>
-
-      {/* Compare CTA — auto-adds this party */}
-      <motion.div
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ delay: 0.6 }}
-        className="bg-card rounded-2xl border-2 border-dashed border-primary/30 p-6 text-center shadow-card"
-      >
-        <Scale className="w-8 h-8 mx-auto mb-3 text-primary" />
-        <h3 className="font-rubik font-bold text-lg mb-1">השוו את {party.name}</h3>
-        <p className="text-muted-foreground text-sm mb-4">בחרו מפלגה להשוואה</p>
-
-        <div className="flex flex-col sm:flex-row items-center justify-center gap-3">
-          {/* Current party badge */}
-          <div className="flex items-center gap-2 bg-muted/50 rounded-xl px-4 py-2">
-            <div
-              className="w-7 h-7 rounded-lg flex items-center justify-center text-white text-xs font-bold"
-              style={{ backgroundColor: party.color }}
-            >
-              {party.name.slice(0, 2)}
-            </div>
-            <span className="text-sm font-medium">{party.name}</span>
-          </div>
-
-          <span className="text-muted-foreground font-bold">VS</span>
-
-          {/* Party selector */}
-          <Select value={comparePartyId} onValueChange={setComparePartyId}>
-            <SelectTrigger className="w-[180px] rounded-xl">
-              <SelectValue placeholder="בחרו מפלגה" />
-            </SelectTrigger>
-            <SelectContent>
-              {otherParties.map(p => (
-                <SelectItem key={p.id} value={p.id}>{p.name}</SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-
-          <Button
-            onClick={handleCompareClick}
-            disabled={!comparePartyId}
-            className="gradient-primary text-primary-foreground rounded-xl gap-2 shadow-glow disabled:opacity-50"
-          >
-            <Scale className="w-4 h-4" />
-            !השוו
-          </Button>
-        </div>
-      </motion.div>
-
-      {/* Comparison Modal */}
-      <ComparisonModal
-        parties={compareParties}
-        open={compareOpen}
-        onClose={() => setCompareOpen(false)}
-      />
+      </div>
     </div>
   );
 }

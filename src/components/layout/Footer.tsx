@@ -11,7 +11,6 @@ export default function Footer() {
         {/* Links */}
         <div className="flex items-center gap-6">
           <Link to="/about" className="hover:text-foreground transition-colors">אודות</Link>
-          <Link to="/donate" className="hover:text-foreground transition-colors">תרומה</Link>
         </div>
 
         {/* Social */}

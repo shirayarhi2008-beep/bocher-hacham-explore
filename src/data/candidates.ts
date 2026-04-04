@@ -202,5 +202,5 @@ function parseTsv(): Candidate[] {
 export const candidates: Candidate[] = parseTsv();
 
 export function getCandidatesByParty(partyId: string): Candidate[] {
-  return candidates.filter(c => c.partyId === partyId);
+  return candidates.filter(c => c.partyId === partyId).sort((a, b) => a.listPosition - b.listPosition);
 }
