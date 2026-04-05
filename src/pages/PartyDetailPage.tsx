@@ -1,5 +1,5 @@
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, Users, Calendar, Clock, GraduationCap } from 'lucide-react';
+import { ChevronRight, Users, Calendar, Clock, GraduationCap, User } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { getPartyById } from '@/data/parties';
 import { getCandidatesByParty } from '@/data/candidates';
@@ -45,12 +45,17 @@ export default function PartyDetailPage() {
     value: candidates.filter(c => c.age >= b.min && c.age <= b.max).length,
   }));
 
-  // Education breakdown
+  // Education breakdown — only include candidates with a non-empty education field
   const eduMap: Record<string, number> = {};
-  candidates.forEach(c => { eduMap[c.education] = (eduMap[c.education] || 0) + 1; });
+  candidates.forEach(c => {
+    if (c.education && c.education.trim()) {
+      eduMap[c.education] = (eduMap[c.education] || 0) + 1;
+    }
+  });
   const educationData = Object.entries(eduMap)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
+  const hasEducationData = educationData.length > 0;
 
   // Region data
   const regionMap: Record<string, number> = {};
@@ -84,7 +89,7 @@ export default function PartyDetailPage() {
           { icon: Users,         label: 'מועמדים',    value: candidates.length },
           { icon: Calendar,      label: 'גיל ממוצע',  value: party.avgAge },
           { icon: Clock,         label: 'ותק ממוצע',  value: `${party.avgSeniority} שנים` },
-          { icon: GraduationCap, label: '% אקדמאים',  value: `${party.educationBreakdown.academic}%` },
+          ...(hasEducationData ? [{ icon: GraduationCap, label: '% אקדמאים', value: `${party.educationBreakdown.academic}%` }] : []),
         ].map(stat => (
           <div key={stat.label} className="bg-white border border-border rounded-lg p-4 text-center">
             <stat.icon className="w-4 h-4 mx-auto mb-2 text-muted-foreground" />
@@ -132,7 +137,7 @@ export default function PartyDetailPage() {
         </div>
 
         {/* Education */}
-        <div className="bg-white border border-border rounded-lg p-5">
+        {hasEducationData && <div className="bg-white border border-border rounded-lg p-5">
           <h3 className="font-semibold text-base mb-4">רמת השכלה</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
@@ -150,7 +155,7 @@ export default function PartyDetailPage() {
               </span>
             ))}
           </div>
-        </div>
+        </div>}
 
         {/* Map */}
         <div className="bg-white border border-border rounded-lg p-5">
@@ -162,18 +167,28 @@ export default function PartyDetailPage() {
       {/* Candidates — vertical list per design system */}
       <div>
         <h2 className="font-bold text-xl mb-4">מועמדי הרשימה</h2>
-        <div className="border border-border rounded-lg overflow-hidden bg-white divide-y divide-border">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
           {candidates.map(c => (
             <Link
               key={c.id}
               to={`/candidates/${c.id}`}
-              className="flex items-center gap-3 px-4 py-3 hover:bg-secondary transition-colors duration-normal group"
+              className="flex items-center gap-3 px-4 py-3 bg-white border border-border rounded-lg hover:bg-secondary transition-colors duration-normal group"
             >
-              <span className="text-xs font-semibold text-muted-foreground w-6 text-center shrink-0">
-                {c.listPosition}
-              </span>
-              <div className="w-8 h-8 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold shrink-0">
-                {c.name.split(' ').map((n: string) => n[0]).join('').slice(0, 2)}
+              <div className="relative shrink-0">
+                {c.photoUrl ? (
+                  <img
+                    src={c.photoUrl}
+                    alt={c.name}
+                    className="w-10 h-10 rounded-full object-cover border border-border"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gray-100 flex items-end justify-center overflow-hidden border border-border">
+                    <User className="w-6 h-6 text-gray-400 mb-[-3px]" />
+                  </div>
+                )}
+                <span className="absolute -bottom-1 -left-1 text-[9px] font-bold text-white bg-primary rounded-full w-4 h-4 flex items-center justify-center leading-none">
+                  {c.listPosition}
+                </span>
               </div>
               <div className="flex-1 min-w-0">
                 <p className="font-medium text-sm text-foreground">{c.name}</p>

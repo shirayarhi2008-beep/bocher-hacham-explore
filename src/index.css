@@ -1,5 +1,29 @@
 @import url('https://fonts.googleapis.com/css2?family=Heebo:wght@300;400;500;600;700;800;900&display=swap');
 
+@font-face {
+  font-family: 'DanaBenOved';
+  src: url('/DanaBenOved_FS/DanaBenOved-Regular.woff2') format('woff2'),
+       url('/DanaBenOved_FS/DanaBenOved-Regular.woff') format('woff'),
+       url('/DanaBenOved_FS/DanaBenOved-Regular.ttf') format('truetype');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'GadiAlmog';
+  src: url('/GadiAlmogAlefAlefAlef/web/gadi-almog-regular-aaa.woff2') format('woff2'),
+       url('/GadiAlmogAlefAlefAlef/web/gadi-almog-regular-aaa.woff') format('woff');
+  font-weight: normal;
+  font-style: normal;
+  font-display: swap;
+}
+
+@keyframes arrowNudge {
+  0%, 100% { transform: translateX(0); }
+  50% { transform: translateX(-4px); }
+}
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;

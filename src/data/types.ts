@@ -62,6 +62,7 @@ export interface Party {
   id: string;
   name: string;
   color: string;
+  ballotLetter?: string;   // אות/ות הרשימה
   seats: number;
   candidates: number;
   genderRatio: number;        // % women
