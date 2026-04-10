@@ -92,7 +92,7 @@ export default function CandidatePage() {
 
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm text-muted-foreground mb-8">
-        <Link to="/lists" className="hover:text-foreground transition-colors">מפלגות</Link>
+        <Link to="/lists" className="hover:text-foreground transition-colors">רשימות</Link>
         <ChevronRight className="w-3.5 h-3.5 rotate-180" />
         {party && (
           <>

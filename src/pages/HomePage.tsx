@@ -17,8 +17,9 @@ export default function HomePage() {
 
         <p className="mt-6 text-white/60"
           style={{ fontSize: 'clamp(1rem, 2.5vw, 1.4rem)', fontFamily: 'GadiAlmog, serif' }}>
-          <span style={{ fontWeight: 300 }}>כל המידע על המועמדים במקום אחד. </span>
-          <span style={{ fontWeight: 700 }}>אתם, כבר תבחרו בעצמכם.</span>
+          <span style={{ fontWeight: 300 }}>כל המידע על המועמדים במקום אחד.</span>
+          <br />
+          <span style={{ fontWeight: 700 }}>אתם כבר תבחרו בעצמכם.</span>
         </p>
 
         <div className="mt-12 flex flex-col sm:flex-row items-center gap-3">

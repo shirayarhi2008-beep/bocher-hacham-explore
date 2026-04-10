@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { Link } from 'react-router-dom';
 import { Candidate } from '@/data/types';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MapPin } from 'lucide-react';
@@ -30,9 +31,16 @@ export default function IsraelMap({ data, color, candidates = [] }: Props) {
   const [hoveredRegion, setHoveredRegion] = useState<string | null>(null);
   const [selectedRegion, setSelectedRegion] = useState<string | null>(null);
   const maxValue = Math.max(...data.map(d => d.value), 1);
+  const total = data.reduce((sum, d) => sum + d.value, 0);
 
   const getRegionValue = (regionName: string): number => {
     return data.find(d => d.name === regionName)?.value || 0;
+  };
+
+  const getPct = (regionName: string): string => {
+    const v = getRegionValue(regionName);
+    if (!v || !total) return '';
+    return `${Math.round((v / total) * 100)}%`;
   };
 
   const getOpacity = (regionName: string): number => {
@@ -75,8 +83,14 @@ export default function IsraelMap({ data, color, candidates = [] }: Props) {
                   x={labelX}
                   y={labelY - 6}
                   textAnchor="middle"
-                  className="text-[8px] font-medium fill-foreground pointer-events-none"
-                  style={{ fontFamily: 'Heebo, sans-serif' }}
+                  fontSize="8"
+                  fontWeight="600"
+                  fontFamily="Heebo, sans-serif"
+                  fill="hsl(var(--foreground))"
+                  stroke="white"
+                  strokeWidth="2.5"
+                  paintOrder="stroke"
+                  style={{ pointerEvents: 'none' }}
                 >
                   {name === 'יהודה ושומרון' ? 'יו"ש' : name}
                 </text>
@@ -85,10 +99,16 @@ export default function IsraelMap({ data, color, candidates = [] }: Props) {
                     x={labelX}
                     y={labelY + 6}
                     textAnchor="middle"
-                    className="text-[9px] font-bold pointer-events-none"
-                    fill={color}
+                    fontSize="8"
+                    fontWeight="700"
+                    fontFamily="Heebo, sans-serif"
+                    fill="hsl(var(--foreground))"
+                    stroke="white"
+                    strokeWidth="2.5"
+                    paintOrder="stroke"
+                    style={{ pointerEvents: 'none' }}
                   >
-                    {value}
+                    {getPct(name)} ({value})
                   </text>
                 )}
               </g>
@@ -103,7 +123,7 @@ export default function IsraelMap({ data, color, candidates = [] }: Props) {
             className="absolute top-2 left-2 bg-card border border-border rounded-lg px-3 py-2 shadow-lg text-sm z-10"
           >
             <p className="font-bold" style={{ color }}>{hoveredRegion}</p>
-            <p className="text-muted-foreground">{getRegionValue(hoveredRegion)} מועמדים</p>
+            <p className="text-muted-foreground">{getPct(hoveredRegion)} ({getRegionValue(hoveredRegion)})</p>
           </motion.div>
         )}
       </div>
@@ -120,9 +140,11 @@ export default function IsraelMap({ data, color, candidates = [] }: Props) {
           <div className="space-y-2 mt-2">
             {regionCandidates.length > 0 ? (
               regionCandidates.map((c) => (
-                <div
+                <Link
                   key={c.id}
-                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border"
+                  to={`/candidates/${c.id}`}
+                  onClick={() => setSelectedRegion(null)}
+                  className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:bg-secondary transition-colors"
                 >
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white text-xs font-bold shrink-0"
@@ -132,9 +154,11 @@ export default function IsraelMap({ data, color, candidates = [] }: Props) {
                   </div>
                   <div className="min-w-0">
                     <p className="font-medium text-sm truncate">{c.name}</p>
-                    <p className="text-xs text-muted-foreground">{c.profession} · גיל {c.age}</p>
+                    {(c.city || c.district) && (
+                      <p className="text-xs text-muted-foreground">{c.city || c.district}</p>
+                    )}
                   </div>
-                </div>
+                </Link>
               ))
             ) : (
               <p className="text-muted-foreground text-sm text-center py-4">אין מועמדים באזור זה</p>

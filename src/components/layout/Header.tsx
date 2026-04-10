@@ -45,7 +45,7 @@ export default function Header() {
               pathname.startsWith('/lists') ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            מפלגות
+            רשימות
           </Link>
           <Link
             to="/people"

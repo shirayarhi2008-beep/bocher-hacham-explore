@@ -23,6 +23,11 @@ const partyIdMap: Record<string, string> = {
   'העבודה': 'democrats',
 };
 
+// Normalize display names (TSV name → display name)
+const partyDisplayName: Record<string, string> = {
+  'המחנה הממלכתי': 'כחול לבן',
+};
+
 // Actual column positions in the real data (0-indexed)
 const C = {
   name: 0,
@@ -140,7 +145,7 @@ function parseTsv(): Candidate[] {
       // Core
       id: `${partyId}-${listPosition}`,
       name,
-      party,
+      party: partyDisplayName[party] ?? party,
       partyId,
       gender,
       region,

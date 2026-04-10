@@ -3,7 +3,7 @@ import { Home, LayoutList, Search } from 'lucide-react';
 
 const items = [
   { icon: Home,       label: 'בית',      path: '/' },
-  { icon: LayoutList, label: 'מפלגות',   path: '/lists' },
+  { icon: LayoutList, label: 'רשימות',   path: '/lists' },
   { icon: Search,     label: 'חיפוש',    path: '/people' },
 ];
 

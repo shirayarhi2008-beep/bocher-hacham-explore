@@ -13,7 +13,7 @@ export const parties: Party[] = [
     genderRatio: 40, avgAge: 48, educationBreakdown: { academic: 72, professional: 20, other: 8 }, avgSeniority: 8,
   },
   {
-    id: 'mahaneh-mamlachti', name: 'המחנה הממלכתי', color: DS[2], ballotLetter: 'כן', seats: 12, candidates: 15,
+    id: 'mahaneh-mamlachti', name: 'כחול לבן', color: DS[2], ballotLetter: 'כן', seats: 12, candidates: 15,
     genderRatio: 40, avgAge: 51, educationBreakdown: { academic: 78, professional: 15, other: 7 }, avgSeniority: 9,
   },
   {

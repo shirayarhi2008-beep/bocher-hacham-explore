@@ -1,6 +1,9 @@
+import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, Users, Calendar, Clock, GraduationCap, User } from 'lucide-react';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Candidate } from '@/data/types';
 import { getPartyById } from '@/data/parties';
 import { getCandidatesByParty } from '@/data/candidates';
 import IsraelMap from '@/components/IsraelMap';
@@ -12,13 +15,14 @@ export default function PartyDetailPage() {
   const navigate = useNavigate();
   const party = getPartyById(id ?? '');
   const candidates = getCandidatesByParty(id ?? '');
+  const [modal, setModal] = useState<{ title: string; list: Candidate[] } | null>(null);
 
   if (!party) {
     return (
       <div className="text-center py-20">
         <p className="text-muted-foreground">מפלגה לא נמצאה</p>
         <button onClick={() => navigate('/lists')} className="mt-3 text-sm text-primary hover:underline">
-          חזרה למפלגות
+          חזרה לרשימות
         </button>
       </div>
     );
@@ -68,7 +72,7 @@ export default function PartyDetailPage() {
     <div className="space-y-8 pb-8">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1.5 text-sm text-muted-foreground">
-        <Link to="/lists" className="hover:text-foreground transition-colors">מפלגות</Link>
+        <Link to="/lists" className="hover:text-foreground transition-colors">רשימות</Link>
         <ChevronRight className="w-3.5 h-3.5 rotate-180" />
         <span className="text-foreground font-medium">{party.name}</span>
       </nav>
@@ -102,11 +106,23 @@ export default function PartyDetailPage() {
       {/* Charts */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Gender */}
-        <div className="bg-white border border-border rounded-lg p-5">
+        <div className="bg-white border border-border rounded-lg p-5 cursor-pointer" onClick={() => {}}>
           <h3 className="font-semibold text-base mb-4">התפלגות מגדרית</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={genderData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={4} dataKey="value">
+              <Pie
+                data={genderData}
+                cx="50%" cy="50%"
+                innerRadius={45} outerRadius={80}
+                paddingAngle={4}
+                dataKey="value"
+                onClick={(_, index) => {
+                  const gender = index === 0 ? 'female' : 'male';
+                  const label = genderData[index].name;
+                  setModal({ title: label, list: candidates.filter(c => c.gender === gender) });
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 {genderData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i]} />)}
               </Pie>
               <Tooltip formatter={(v: number) => [`${v} מועמדים`, '']} />
@@ -114,10 +130,17 @@ export default function PartyDetailPage() {
           </ResponsiveContainer>
           <div className="flex justify-center gap-5 mt-1">
             {genderData.map((d, i) => (
-              <span key={d.name} className="flex items-center gap-1.5 text-xs text-muted-foreground">
+              <button
+                key={d.name}
+                className="flex items-center gap-1.5 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => {
+                  const gender = i === 0 ? 'female' : 'male';
+                  setModal({ title: d.name, list: candidates.filter(c => c.gender === gender) });
+                }}
+              >
                 <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: CHART_COLORS[i] }} />
-                {d.name} ({d.value})
-              </span>
+                {d.name} {Math.round((d.value / candidates.length) * 100)}% ({d.value})
+              </button>
             ))}
           </div>
         </div>
@@ -141,7 +164,18 @@ export default function PartyDetailPage() {
           <h3 className="font-semibold text-base mb-4">רמת השכלה</h3>
           <ResponsiveContainer width="100%" height={200}>
             <PieChart>
-              <Pie data={educationData} cx="50%" cy="50%" innerRadius={45} outerRadius={80} paddingAngle={3} dataKey="value">
+              <Pie
+                data={educationData}
+                cx="50%" cy="50%"
+                innerRadius={45} outerRadius={80}
+                paddingAngle={3}
+                dataKey="value"
+                onClick={(_, index) => {
+                  const edu = educationData[index].name;
+                  setModal({ title: edu, list: candidates.filter(c => c.education === edu) });
+                }}
+                style={{ cursor: 'pointer' }}
+              >
                 {educationData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
               </Pie>
               <Tooltip formatter={(v: number, name: string) => [v, name]} />
@@ -149,10 +183,14 @@ export default function PartyDetailPage() {
           </ResponsiveContainer>
           <div className="flex flex-wrap justify-center gap-2 mt-1">
             {educationData.slice(0, 4).map((d, i) => (
-              <span key={d.name} className="flex items-center gap-1 text-xs text-muted-foreground">
+              <button
+                key={d.name}
+                className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                onClick={() => setModal({ title: d.name, list: candidates.filter(c => c.education === d.name) })}
+              >
                 <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
-                {d.name} ({d.value})
-              </span>
+                {d.name} {Math.round((d.value / candidates.length) * 100)}% ({d.value})
+              </button>
             ))}
           </div>
         </div>}
@@ -163,6 +201,37 @@ export default function PartyDetailPage() {
           <IsraelMap data={regionData} color="#2952d9" candidates={candidates} />
         </div>
       </div>
+
+      {/* Candidates modal (gender / education) */}
+      <Dialog open={!!modal} onOpenChange={(open) => !open && setModal(null)}>
+        <DialogContent className="max-w-md max-h-[70vh] overflow-y-auto" dir="rtl">
+          <DialogHeader>
+            <DialogTitle className="text-right">{modal?.title} · {modal?.list.length} מועמדים</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-2 mt-2">
+            {modal?.list.map(c => (
+              <Link
+                key={c.id}
+                to={`/candidates/${c.id}`}
+                onClick={() => setModal(null)}
+                className="flex items-center gap-3 p-3 rounded-xl bg-muted/50 border border-border hover:bg-secondary transition-colors"
+              >
+                {c.photoUrl ? (
+                  <img src={c.photoUrl} alt={c.name} className="w-9 h-9 rounded-full object-cover shrink-0" />
+                ) : (
+                  <div className="w-9 h-9 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+                    <User className="w-5 h-5 text-primary/50" />
+                  </div>
+                )}
+                <div className="min-w-0">
+                  <p className="font-medium text-sm">{c.name}</p>
+                  <p className="text-xs text-muted-foreground">מקום {c.listPosition} · {c.profession || c.party}</p>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </DialogContent>
+      </Dialog>
 
       {/* Candidates — vertical list per design system */}
       <div>

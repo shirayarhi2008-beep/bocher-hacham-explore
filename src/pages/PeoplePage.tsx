@@ -63,7 +63,7 @@ export default function PeoplePage() {
       <div>
         <h1 className="font-bold text-2xl md:text-3xl text-foreground">מועמדים</h1>
         <p className="text-muted-foreground text-sm mt-1">
-          {totalCount} מועמדים מ-{parties.length} מפלגות
+          {totalCount} מועמדים מ-{parties.length} רשימות
         </p>
       </div>
 
