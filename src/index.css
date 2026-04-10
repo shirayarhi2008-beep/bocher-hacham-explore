@@ -122,3 +122,115 @@
   /* ── Legacy compat ───────────────────────────────── */
   .shadow-glow { box-shadow: 0 0 0 3px rgba(41, 82, 217, 0.15); }
 }
+
+/* ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+   ACCESSIBILITY OVERRIDES  (SI 5568 / WCAG 2.1 AA)
+   All rules are scoped to body classes set by
+   AccessibilityMenu, so they never activate by default.
+   ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ */
+
+/* ── Skip-to-content link ────────────────────────────
+   Invisible until focused — first tabbable element.      */
+.skip-to-content {
+  position: fixed;
+  top: -100%;
+  inset-inline-start: 50%;
+  transform: translateX(-50%);
+  background: hsl(var(--primary));
+  color: hsl(var(--primary-foreground));
+  padding: 0.5rem 1.25rem;
+  border-radius: 0 0 0.5rem 0.5rem;
+  font-weight: 600;
+  font-size: 0.9rem;
+  z-index: 9999;
+  text-decoration: none;
+  transition: top 0.15s ease;
+  white-space: nowrap;
+}
+.skip-to-content:focus {
+  top: 0;
+  outline: 3px solid hsl(var(--ring));
+  outline-offset: 2px;
+}
+
+/* ── High Contrast ───────────────────────────────────
+   Black background + yellow text, WCAG AAA contrast.    */
+body.high-contrast {
+  background-color: #000 !important;
+  color: #ff0 !important;
+}
+body.high-contrast *:not(script):not(style) {
+  background-color: #000 !important;
+  color: #ff0 !important;
+  border-color: #ff0 !important;
+  outline-color: #ff0 !important;
+}
+body.high-contrast img {
+  filter: brightness(0.9) contrast(1.2);
+}
+body.high-contrast a,
+body.high-contrast a * {
+  color: #0ff !important; /* cyan links — distinct from yellow body text */
+}
+body.high-contrast button,
+body.high-contrast [role="button"],
+body.high-contrast [role="switch"] {
+  outline: 2px solid #ff0 !important;
+  outline-offset: 1px !important;
+}
+body.high-contrast :focus-visible {
+  outline: 3px solid #ff0 !important;
+  outline-offset: 2px !important;
+}
+
+/* ── Grayscale mode ──────────────────────────────────
+   Filter is applied to <html>, NOT <body>.
+   Applying filter to body creates a new stacking context
+   that breaks position:fixed children (mobile nav,
+   accessibility button) and causes a scrollbar-width
+   layout shift. Applying it to html avoids both issues
+   because html is sized exactly to the viewport, so
+   fixed descendants still anchor to the right place.    */
+html.grayscale-mode {
+  filter: grayscale(100%);
+}
+
+/* ── Highlight links ─────────────────────────────────
+   Makes every anchor clearly identifiable at a glance.  */
+body.highlight-links a {
+  text-decoration: underline !important;
+  text-decoration-thickness: 2px !important;
+  text-underline-offset: 3px !important;
+  outline: 1px solid hsl(var(--primary)) !important;
+  /* border-radius intentionally omitted — each element keeps its own
+     value (e.g. rounded-pill on CTA buttons stays intact).
+     Modern browsers draw outlines following the element's border-radius
+     automatically, so pill buttons stay pill-shaped.
+     background-color also omitted to avoid overriding button backgrounds. */
+}
+
+/* ── Reduce motion ───────────────────────────────────
+   Collapses all animation/transition durations to
+   near-zero without fully disabling them (preserves
+   browser paint hints).  Respects user OS preference
+   automatically via the media query below as well.      */
+body.reduce-motion *,
+body.reduce-motion *::before,
+body.reduce-motion *::after {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
+}
+
+/* Also honour the OS-level preference unconditionally */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}

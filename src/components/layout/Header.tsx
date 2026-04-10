@@ -26,19 +26,20 @@ export default function Header() {
       </svg>
 
       <div className="container mx-auto px-6 max-w-content h-16 flex items-center justify-between">
-        {/* Logo */}
-        <Link to="/" className="flex items-center gap-2.5 shrink-0">
+        {/* Logo — img is decorative because the adjacent text already labels the link */}
+        <Link to="/" className="flex items-center gap-2.5 shrink-0" aria-label="בוחרים ח״כם — דף בית">
           <img
             src="/logo.png"
-            alt="לוגו"
+            alt=""
+            aria-hidden="true"
             className="w-8 h-8 object-contain"
             style={{ filter: `url(#${LOGO_FILTER_ID})` }}
           />
-          <span className="font-bold text-primary text-lg">בוחרים ח״כם</span>
+          <span className="font-bold text-primary text-lg" aria-hidden="true">בוחרים ח״כם</span>
         </Link>
 
         {/* Desktop nav — hidden on mobile (bottom nav handles it) */}
-        <nav className="hidden md:flex items-center gap-6">
+        <nav aria-label="ניווט ראשי" className="hidden md:flex items-center gap-6">
           <Link
             to="/lists"
             className={`text-sm font-medium transition-colors duration-normal ${
@@ -47,14 +48,15 @@ export default function Header() {
           >
             רשימות
           </Link>
+          {/* Search link — icon + sr-only text satisfies WCAG 2.4.6 for icon-only controls */}
           <Link
             to="/people"
-            aria-label="חיפוש"
-            className={`transition-colors duration-normal ${
+            className={`flex items-center transition-colors duration-normal focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-sm ${
               pathname === '/people' ? 'text-primary' : 'text-muted-foreground hover:text-foreground'
             }`}
           >
-            <Search className="w-5 h-5" />
+            <Search className="w-5 h-5" aria-hidden="true" />
+            <span className="sr-only">חיפוש מועמדים</span>
           </Link>
         </nav>
       </div>
