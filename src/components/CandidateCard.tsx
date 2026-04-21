@@ -41,7 +41,7 @@ export default function CandidateCard({ candidate, accentColor = '#5982fe' }: Pr
             className="absolute -bottom-1 -left-1 text-[10px] font-bold text-white rounded-full w-5 h-5 flex items-center justify-center leading-none"
             style={{ backgroundColor: accentColor }}
           >
-            {candidate.listPosition}
+            {candidate.listPosition || '?'}
           </span>
         </div>
 

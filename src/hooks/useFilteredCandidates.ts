@@ -11,7 +11,7 @@ export interface CandidateFilters {
   topics: string[];                // ticket values (empty = all)
 }
 
-const MAX_POSITION = Math.max(...allCandidates.map(c => c.listPosition), 40);
+const MAX_POSITION = Math.max(...allCandidates.filter(c => c.listPosition > 0).map(c => c.listPosition), 40);
 
 export const DEFAULT_FILTERS: CandidateFilters = {
   search: '',
@@ -77,7 +77,8 @@ export function useFilteredCandidates() {
 
     const [minPos, maxPos] = filters.listPositionRange;
     if (minPos > 1 || maxPos < MAX_POSITION) {
-      result = result.filter(c => c.listPosition >= minPos && c.listPosition <= maxPos);
+      // listPosition === 0 means unknown — always include regardless of range filter
+      result = result.filter(c => c.listPosition === 0 || (c.listPosition >= minPos && c.listPosition <= maxPos));
     }
 
     if (filters.newcomerOnly) {

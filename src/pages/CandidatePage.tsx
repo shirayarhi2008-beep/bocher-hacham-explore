@@ -135,7 +135,7 @@ export default function CandidatePage() {
               </Link>
             )}
             <span className="text-xs font-semibold text-primary-light bg-primary-light/10 border border-primary-light/25 rounded-pill px-3 py-0.5">
-              מקום {candidate.listPosition}
+              מקום {candidate.listPosition || '?'}
             </span>
             {candidate.ministerialExperience && (
               <span className="text-xs text-muted-foreground bg-gray-50 border border-border rounded-pill px-3 py-0.5">

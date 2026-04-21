@@ -225,7 +225,7 @@ export default function PartyDetailPage() {
                 )}
                 <div className="min-w-0">
                   <p className="font-medium text-sm">{c.name}</p>
-                  <p className="text-xs text-muted-foreground">מקום {c.listPosition} · {c.profession || c.party}</p>
+                  <p className="text-xs text-muted-foreground">מקום {c.listPosition || '?'} · {c.profession || c.party}</p>
                 </div>
               </Link>
             ))}
@@ -256,7 +256,7 @@ export default function PartyDetailPage() {
                   </div>
                 )}
                 <span className="absolute -bottom-1 -left-1 text-[9px] font-bold text-white bg-primary rounded-full w-4 h-4 flex items-center justify-center leading-none">
-                  {c.listPosition}
+                  {c.listPosition || '?'}
                 </span>
               </div>
               <div className="flex-1 min-w-0">

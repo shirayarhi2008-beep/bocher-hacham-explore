@@ -29,58 +29,64 @@ const partyDisplayName: Record<string, string> = {
 };
 
 // Actual column positions in the real data (0-indexed)
+// Updated to match TSV v2: new cols at 3 (candidateStatus), 13 (vector skip),
+// 16 (vector skip), 30 (hassidut) shift everything accordingly.
 const C = {
   name: 0,
   party: 1,
   listPosition: 2,
-  training: 3,
-  educationLevel: 4,
-  educationField: 5,
-  educationInstitution: 6,
-  educationCategory: 7,
-  firstElected: 8,
-  seniority: 9,
-  preKnessetRole: 10,
-  preKnessetCategory: 11,
-  role2: 12,
-  role2Category: 13,
-  currentRole: 14,
-  ministerialPast: 15,
-  ministerialExperience: 16,  // "V" = true
-  committees: 17,
-  previousParty: 18,
-  gender: 19,                  // "ז" = male, "נ" = female
-  birthYear: 20,
-  age: 21,
-  militaryType: 22,
-  militaryRank: 23,
-  militaryUnit: 24,
-  isCombat: 25,                // "V" = true
-  exemptionReason: 26,
-  underTrial: 27,
-  sector: 28,
-  subGroup: 29,
-  city: 30,
-  district: 31,                // has "מחוז " prefix
-  subDistrict: 32,             // has "נפת " prefix
-  peripheryIndex: 33,
-  languages: 34,               // comma-separated
-  orientation: 35,
-  ticket1: 36,
-  _ticket1Vector: 37,          // skip
-  ticket2: 38,
-  _ticket2Vector: 39,          // skip
-  funFact: 40,
-  _economicInterests: 41,      // skip for now
-  wikipedia: 42,
-  facebook: 43,
-  knessetSite: 44,
-  stanceDraft: 45,
-  stanceEducation: 46,
-  stanceTransport: 47,
-  _courage: 48,
-  _committeeAttendance: 49,
-  _knessetAttendance: 50,
+  // col 3: מועמד חדש/מכהן/חוזר — candidateStatus (not in Candidate type)
+  training: 4,
+  educationLevel: 5,
+  educationField: 6,
+  educationInstitution: 7,
+  educationCategory: 8,
+  firstElected: 9,
+  seniority: 10,
+  preKnessetRole: 11,
+  preKnessetCategory: 12,
+  // col 13: ווקטור קטגוריה 1 — skip
+  role2: 14,
+  role2Category: 15,
+  // col 16: ווקטור קטגוריה 2 — skip
+  currentRole: 17,
+  ministerialPast: 18,
+  ministerialExperience: 19,  // "V" = true
+  committees: 20,
+  previousParty: 21,
+  gender: 22,                  // "ז" = male, "נ" = female
+  birthYear: 23,
+  age: 24,
+  militaryType: 25,
+  militaryRank: 26,
+  militaryUnit: 27,
+  isCombat: 28,                // "V" = true
+  exemptionReason: 29,
+  // col 30: ישיבה\חסידות — hassidut (not in Candidate type)
+  underTrial: 31,
+  sector: 32,
+  subGroup: 33,
+  city: 34,
+  district: 35,                // has "מחוז " prefix
+  subDistrict: 36,             // has "נפת " prefix
+  peripheryIndex: 37,
+  languages: 38,               // comma-separated
+  orientation: 39,
+  ticket1: 40,
+  _ticket1Vector: 41,          // skip
+  ticket2: 42,
+  _ticket2Vector: 43,          // skip
+  funFact: 44,
+  _economicInterests: 45,      // skip for now
+  wikipedia: 46,
+  facebook: 47,
+  knessetSite: 48,
+  stanceDraft: 49,
+  stanceEducation: 50,
+  stanceTransport: 51,
+  _courage: 52,
+  _committeeAttendance: 53,
+  _knessetAttendance: 54,
 } as const;
 
 function col(cols: string[], idx: number): string {
@@ -108,7 +114,9 @@ function parseTsv(): Candidate[] {
     // Skip header/metadata rows: list position must be a valid number
     const rawPosition = col(cols, C.listPosition);
     const listPosition = parseInt(rawPosition, 10);
-    if (!name || !party || isNaN(listPosition) || listPosition <= 0) return;
+    // Skip only truly empty/header rows — missing position gets 0 (displayed as "?")
+    if (!name || !party) return;
+    const resolvedPosition = (isNaN(listPosition) || listPosition <= 0) ? 0 : listPosition;
 
     const partyId = partyIdMap[party] ?? party.replace(/['"״]/g, '').replace(/\s+/g, '-').toLowerCase();
 
@@ -143,7 +151,7 @@ function parseTsv(): Candidate[] {
 
     result.push({
       // Core
-      id: `${partyId}-${listPosition}`,
+      id: resolvedPosition > 0 ? `${partyId}-${resolvedPosition}` : `${partyId}-${name.replace(/\s+/g, '-')}`,
       name,
       party: partyDisplayName[party] ?? party,
       partyId,
@@ -153,7 +161,7 @@ function parseTsv(): Candidate[] {
       education: col(cols, C.educationLevel),
       seniority,
       profession: col(cols, C.preKnessetRole),
-      listPosition,
+      listPosition: resolvedPosition,
 
       // Professional identity
       training: col(cols, C.training) || undefined,
@@ -207,5 +215,9 @@ function parseTsv(): Candidate[] {
 export const candidates: Candidate[] = parseTsv();
 
 export function getCandidatesByParty(partyId: string): Candidate[] {
-  return candidates.filter(c => c.partyId === partyId).sort((a, b) => a.listPosition - b.listPosition);
+  return candidates.filter(c => c.partyId === partyId).sort((a, b) => {
+    if (a.listPosition === 0) return 1;
+    if (b.listPosition === 0) return -1;
+    return a.listPosition - b.listPosition;
+  });
 }
