@@ -1,12 +1,24 @@
 import { useState } from 'react';
 import { Search } from 'lucide-react';
 import { parties } from '@/data/parties';
+import { candidates } from '@/data/candidates';
 import PartyCard from '@/components/PartyCard';
+
+// Count actual candidates per party from TSV data
+const actualCounts: Record<string, number> = {};
+for (const c of candidates) {
+  actualCounts[c.partyId] = (actualCounts[c.partyId] ?? 0) + 1;
+}
+
+// Merge actual counts and drop parties with 0 candidates
+const partiesWithData = parties
+  .map(p => ({ ...p, candidates: actualCounts[p.id] ?? 0 }))
+  .filter(p => p.candidates > 0);
 
 export default function ListsPage() {
   const [search, setSearch] = useState('');
 
-  const filtered = parties.filter(p =>
+  const filtered = partiesWithData.filter(p =>
     p.name.includes(search) || p.ballotLetter?.includes(search)
   );
 

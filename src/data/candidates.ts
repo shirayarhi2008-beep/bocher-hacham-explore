@@ -1,5 +1,5 @@
 import { Candidate } from './types';
-import rawTsv from './candidates-raw.tsv?raw';
+import rawTsv from './spreadsheet_data.tsv?raw';
 
 // Map Hebrew party names → internal IDs
 const partyIdMap: Record<string, string> = {
@@ -111,11 +111,10 @@ function parseTsv(): Candidate[] {
 
     const name = col(cols, C.name);
     const party = col(cols, C.party);
-    // Skip header/metadata rows: list position must be a valid number
+    // Skip empty or header rows
+    if (!name || !party || name === 'שם חבר הכנסת') return;
     const rawPosition = col(cols, C.listPosition);
     const listPosition = parseInt(rawPosition, 10);
-    // Skip only truly empty/header rows — missing position gets 0 (displayed as "?")
-    if (!name || !party) return;
     const resolvedPosition = (isNaN(listPosition) || listPosition <= 0) ? 0 : listPosition;
 
     const partyId = partyIdMap[party] ?? party.replace(/['"״]/g, '').replace(/\s+/g, '-').toLowerCase();
