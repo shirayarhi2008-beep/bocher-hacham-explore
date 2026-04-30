@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ChevronRight, Users, Calendar, Clock, GraduationCap, User } from 'lucide-react';
+import { ChevronRight, Users, Calendar, Clock, GraduationCap, User, GitCompareArrows } from 'lucide-react';
+import { useCompare } from '@/context/CompareContext';
 import cityClusterMap from '@/data/peripherality-map.json';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -17,6 +18,7 @@ export default function PartyDetailPage() {
   const party = getPartyById(id ?? '');
   const candidates = getCandidatesByParty(id ?? '');
   const [modal, setModal] = useState<{ title: string; list: Candidate[] } | null>(null);
+  const { openModal: openCompare } = useCompare();
 
   if (!party) {
     return (
@@ -116,11 +118,18 @@ export default function PartyDetailPage() {
 
       {/* Party header */}
       <div className="bg-white border border-border rounded-lg p-6">
-        <div className="flex items-center gap-4">
+        <div className="flex items-start justify-between gap-4">
           <div>
             <h1 className="font-bold text-2xl md:text-3xl text-foreground">{party.name}</h1>
             <p className="text-muted-foreground text-sm mt-0.5">{party.seats} מנדטים · {candidates.length} מועמדים ברשימה</p>
           </div>
+          <button
+            onClick={() => openCompare(party.id)}
+            className="inline-flex items-center gap-1.5 text-xs font-semibold text-primary border border-primary/30 bg-primary/6 px-3 py-1.5 rounded-pill hover:bg-primary/12 transition-colors shrink-0 mt-1"
+          >
+            <GitCompareArrows className="w-3.5 h-3.5" />
+            השוואה
+          </button>
         </div>
       </div>
 

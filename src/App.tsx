@@ -11,6 +11,8 @@ import PartyDetailPage from './pages/PartyDetailPage';
 import CandidatePage from './pages/CandidatePage';
 import AboutPage from './pages/AboutPage';
 import NotFound from './pages/NotFound';
+import { CompareProvider } from '@/context/CompareContext';
+import CompareModal from '@/components/CompareModal';
 
 const queryClient = new QueryClient();
 
@@ -19,6 +21,8 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
+      <CompareProvider>
+      <CompareModal />
       <BrowserRouter>
         <Routes>
           <Route element={<AppLayout />}>
@@ -32,6 +36,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>
+      </CompareProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );

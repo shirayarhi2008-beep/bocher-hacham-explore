@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Search } from 'lucide-react';
+import { Search, GitCompareArrows } from 'lucide-react';
 import { parties } from '@/data/parties';
 import { candidates } from '@/data/candidates';
 import PartyCard from '@/components/PartyCard';
+import { useCompare } from '@/context/CompareContext';
 
 // Count actual candidates per party from TSV data
 const actualCounts: Record<string, number> = {};
@@ -17,6 +18,7 @@ const partiesWithData = parties
 
 export default function ListsPage() {
   const [search, setSearch] = useState('');
+  const { openModal } = useCompare();
 
   const filtered = partiesWithData.filter(p =>
     p.name.includes(search) || p.ballotLetter?.includes(search)
@@ -49,6 +51,17 @@ export default function ListsPage() {
         {filtered.length === 0 && (
           <p className="col-span-2 text-center text-muted-foreground text-sm py-10">לא נמצאה רשימה</p>
         )}
+      </div>
+
+      {/* Compare CTA */}
+      <div className="flex justify-center pt-2">
+        <button
+          onClick={() => openModal()}
+          className="inline-flex items-center gap-2 bg-white border border-border text-foreground font-semibold px-5 py-3 rounded-pill text-sm hover:border-primary hover:text-primary transition-colors shadow-sm"
+        >
+          <GitCompareArrows className="w-4 h-4" />
+          השוואה בין מפלגות
+        </button>
       </div>
     </div>
   );
