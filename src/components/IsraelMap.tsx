@@ -23,8 +23,7 @@ const REGION_PATHS: Record<string, { path: string; labelX: number; labelY: numbe
   'תל אביב': { path: 'M45,115 L55,120 L50,145 L40,140 L35,125 Z', labelX: 45, labelY: 130 },
   'ירושלים': { path: 'M110,120 L140,115 L150,140 L140,165 L115,160 L115,155 Z', labelX: 130, labelY: 140 },
   'יהודה ושומרון': { path: 'M105,85 L130,75 L145,90 L150,110 L140,115 L110,120 L100,115 L105,110 Z', labelX: 125, labelY: 100 },
-  'דרום': { path: 'M60,165 L100,170 L140,165 L150,200 L130,260 L110,300 L100,310 L90,290 L70,240 L50,200 Z', labelX: 100, labelY: 220 },
-  'נגב': { path: 'M50,200 L70,240 L90,290 L100,310 L85,320 L60,290 L40,250 L35,220 Z', labelX: 65, labelY: 270 },
+  'דרום': { path: 'M60,165 L100,170 L140,165 L150,200 L130,260 L110,300 L100,320 L85,320 L60,290 L40,250 L35,220 L50,200 Z', labelX: 95, labelY: 245 },
 };
 
 export default function IsraelMap({ data, color, candidates = [] }: Props) {

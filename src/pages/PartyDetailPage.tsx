@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ChevronRight, Users, Calendar, Clock, GraduationCap, User } from 'lucide-react';
+import cityClusterMap from '@/data/peripherality-map.json';
 import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip, BarChart, Bar, XAxis, YAxis, CartesianGrid } from 'recharts';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Candidate } from '@/data/types';
@@ -61,9 +62,45 @@ export default function PartyDetailPage() {
     .sort((a, b) => b.value - a.value);
   const hasEducationData = educationData.length > 0;
 
+  // Peripherality (1=פריפריה, 10=מרכז)
+  const clusterLookup = cityClusterMap as Record<string, number>;
+  let peripheralitySum = 0;
+  let peripheralityCoverage = 0;
+  candidates.forEach(c => {
+    const city = c.city?.trim();
+    const cluster = city ? clusterLookup[city] : undefined;
+    if (cluster) {
+      peripheralitySum += cluster;
+      peripheralityCoverage++;
+    }
+  });
+  const avgCluster = peripheralityCoverage > 0
+    ? Math.round((peripheralitySum / peripheralityCoverage) * 10) / 10
+    : null;
+  const avgClusterLabel = avgCluster !== null
+    ? avgCluster <= 2 ? 'פריפריה'
+    : avgCluster <= 4 ? 'חצי-פריפריה'
+    : avgCluster <= 7 ? 'מרכז-שוליים'
+    : 'מרכז'
+    : null;
+
+  // Military type distribution
+  const militaryMap: Record<string, number> = {};
+  candidates.forEach(c => {
+    const key = c.militaryType?.trim() || (c.exemptionReason ? 'פטור' : 'לא ידוע');
+    militaryMap[key] = (militaryMap[key] || 0) + 1;
+  });
+  const militaryData = Object.entries(militaryMap)
+    .map(([name, value]) => ({ name, value }))
+    .sort((a, b) => b.value - a.value);
+  const hasMilitaryData = militaryData.length > 0;
+
   // Region data
   const regionMap: Record<string, number> = {};
-  candidates.forEach(c => { regionMap[c.region] = (regionMap[c.region] || 0) + 1; });
+  candidates.forEach(c => {
+    const region = c.region === 'נגב' ? 'דרום' : c.region;
+    regionMap[region] = (regionMap[region] || 0) + 1;
+  });
   const regionData = Object.entries(regionMap)
     .map(([name, value]) => ({ name, value }))
     .sort((a, b) => b.value - a.value);
@@ -195,9 +232,79 @@ export default function PartyDetailPage() {
           </div>
         </div>}
 
+        {/* Military */}
+        {hasMilitaryData && (
+          <div className="bg-white border border-border rounded-lg p-5">
+            <h3 className="font-semibold text-base mb-4">שירות צבאי</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <PieChart>
+                <Pie
+                  data={militaryData}
+                  cx="50%" cy="50%"
+                  innerRadius={45} outerRadius={80}
+                  paddingAngle={3}
+                  dataKey="value"
+                  onClick={(_, index) => {
+                    const type = militaryData[index].name;
+                    setModal({
+                      title: type,
+                      list: candidates.filter(c => {
+                        const key = c.militaryType?.trim() || (c.exemptionReason ? 'פטור' : 'לא ידוע');
+                        return key === type;
+                      }),
+                    });
+                  }}
+                  style={{ cursor: 'pointer' }}
+                >
+                  {militaryData.map((_, i) => <Cell key={i} fill={CHART_COLORS[i % CHART_COLORS.length]} />)}
+                </Pie>
+                <Tooltip formatter={(v: number, name: string) => [v, name]} />
+              </PieChart>
+            </ResponsiveContainer>
+            <div className="flex flex-wrap justify-center gap-2 mt-1">
+              {militaryData.map((d, i) => (
+                <button
+                  key={d.name}
+                  className="flex items-center gap-1 text-xs text-muted-foreground hover:text-foreground transition-colors"
+                  onClick={() => setModal({
+                    title: d.name,
+                    list: candidates.filter(c => {
+                      const key = c.militaryType?.trim() || (c.exemptionReason ? 'פטור' : 'לא ידוע');
+                      return key === d.name;
+                    }),
+                  })}
+                >
+                  <span className="w-2 h-2 rounded-full" style={{ backgroundColor: CHART_COLORS[i % CHART_COLORS.length] }} />
+                  {d.name} ({d.value})
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* Map */}
         <div className="bg-white border border-border rounded-lg p-5">
-          <h3 className="font-semibold text-base mb-4">פריסה גיאוגרפית</h3>
+          <h3 className="font-semibold text-base mb-4">מדד הפריפריה</h3>
+          {avgCluster !== null && (
+            <div className="flex items-end gap-3 mb-5">
+              <div
+                className="group relative cursor-help"
+              >
+                <p className="text-5xl font-black text-primary leading-none">{avgCluster}</p>
+                <p className="text-xs text-muted-foreground mt-1">מתוך 10 ⓘ</p>
+                {/* Tooltip */}
+                <div className="absolute bottom-full right-0 mb-2 w-64 bg-foreground text-background text-xs rounded-lg px-3 py-2 opacity-0 group-hover:opacity-100 transition-opacity duration-150 pointer-events-none z-20 leading-relaxed text-right">
+                  מחושב לפי מדד הפריפריאליות של הלמ"ס 2020.<br />
+                  1 = פריפריה מרוחקת, 10 = מרכז.<br />
+                  מבוסס על {peripheralityCoverage} מועמדים שעיר מגוריהם ידועה.
+                </div>
+              </div>
+              <div className="pb-1">
+                <p className="font-semibold text-sm text-foreground">{avgClusterLabel}</p>
+                <p className="text-xs text-muted-foreground">{peripheralityCoverage} מועמדים</p>
+              </div>
+            </div>
+          )}
           <IsraelMap data={regionData} color="#2952d9" candidates={candidates} />
         </div>
       </div>
