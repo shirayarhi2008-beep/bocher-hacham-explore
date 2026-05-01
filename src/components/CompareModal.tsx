@@ -19,15 +19,14 @@ const availableParties = parties
   .filter(p => p.candidates > 0)
   .sort((a, b) => b.candidates - a.candidates);
 
-const COLOR_A = '#2952d9';
-const COLOR_B = '#fa8501';
 
 // ── helpers ───────────────────────────────────────────────────────────────────
-function PartyBadge({ id, color, locked, onRemove }: {
-  id: string; color: string; locked: boolean; onRemove: () => void;
+function PartyBadge({ id, locked, onRemove }: {
+  id: string; locked: boolean; onRemove: () => void;
 }) {
   const party = getPartyById(id);
   if (!party) return null;
+  const color = party.color;
   return (
     <div
       className="flex items-center gap-2 px-3 py-2 rounded-xl border-2 bg-white shadow-sm"
@@ -61,11 +60,10 @@ function SelectStep() {
     <div className="px-6 py-5 space-y-6">
       {/* selected pills */}
       <div className="flex flex-wrap gap-3 min-h-[48px] items-center">
-        {compareIds.map((id, i) => (
+        {compareIds.map((id) => (
           <PartyBadge
             key={id}
             id={id}
-            color={i === 0 ? COLOR_A : COLOR_B}
             locked={id === lockedId}
             onRemove={() => removeParty(id)}
           />
@@ -137,7 +135,7 @@ function SelectStep() {
 }
 
 // ── step 2: comparison ────────────────────────────────────────────────────────
-function StatCard({ label, a, b, unit = '' }: { label: string; a: number | null; b: number | null; unit?: string }) {
+function StatCard({ label, a, b, unit = '', colorA, colorB }: { label: string; a: number | null; b: number | null; unit?: string; colorA: string; colorB: string }) {
   const aVal = a ?? 0;
   const bVal = b ?? 0;
   const max = Math.max(aVal, bVal, 1);
@@ -146,31 +144,30 @@ function StatCard({ label, a, b, unit = '' }: { label: string; a: number | null;
       <p className="text-xs font-semibold text-muted-foreground">{label}</p>
       <div className="flex items-end gap-3">
         <div className="flex-1 text-right">
-          <p className="font-black text-2xl leading-none" style={{ color: COLOR_A }}>
+          <p className="font-black text-2xl leading-none" style={{ color: colorA }}>
             {a !== null ? `${a}${unit}` : '—'}
           </p>
         </div>
         <div className="flex-1 text-right">
-          <p className="font-black text-2xl leading-none" style={{ color: COLOR_B }}>
+          <p className="font-black text-2xl leading-none" style={{ color: colorB }}>
             {b !== null ? `${b}${unit}` : '—'}
           </p>
         </div>
       </div>
-      {/* bar comparison */}
       <div className="space-y-1">
         <div className="flex items-center gap-1.5">
-          <div className="h-2 rounded-full transition-all" style={{ width: `${(aVal / max) * 100}%`, backgroundColor: COLOR_A, minWidth: 4 }} />
+          <div className="h-2 rounded-full transition-all" style={{ width: `${(aVal / max) * 100}%`, backgroundColor: colorA, minWidth: 4 }} />
         </div>
         <div className="flex items-center gap-1.5">
-          <div className="h-2 rounded-full transition-all" style={{ width: `${(bVal / max) * 100}%`, backgroundColor: COLOR_B, minWidth: 4 }} />
+          <div className="h-2 rounded-full transition-all" style={{ width: `${(bVal / max) * 100}%`, backgroundColor: colorB, minWidth: 4 }} />
         </div>
       </div>
     </div>
   );
 }
 
-function PctPieChart({ label, aVal, bVal, aName, bName }: {
-  label: string; aVal: number; bVal: number; aName: string; bName: string;
+function PctPieChart({ label, aVal, bVal, aName, bName, colorA, colorB }: {
+  label: string; aVal: number; bVal: number; aName: string; bName: string; colorA: string; colorB: string;
 }) {
   const dataA = [{ value: aVal }, { value: 100 - aVal }];
   const dataB = [{ value: bVal }, { value: 100 - bVal }];
@@ -178,8 +175,8 @@ function PctPieChart({ label, aVal, bVal, aName, bName }: {
     <div className="bg-gray-50 rounded-xl p-4">
       <p className="text-xs font-semibold text-muted-foreground mb-2">{label}</p>
       <div className="flex justify-around items-center">
-        {[{ data: dataA, color: COLOR_A, name: aName, val: aVal },
-          { data: dataB, color: COLOR_B, name: bName, val: bVal }].map(({ data, color, name, val }) => (
+        {[{ data: dataA, color: colorA, name: aName, val: aVal },
+          { data: dataB, color: colorB, name: bName, val: bVal }].map(({ data, color, name, val }) => (
           <div key={name} className="flex flex-col items-center gap-1">
             <ResponsiveContainer width={80} height={80}>
               <PieChart>
@@ -198,10 +195,10 @@ function PctPieChart({ label, aVal, bVal, aName, bName }: {
   );
 }
 
-function RadarSection({ sA, sB, nameA, nameB }: {
+function RadarSection({ sA, sB, nameA, nameB, colorA, colorB }: {
   sA: ReturnType<typeof computePartyStats>;
   sB: ReturnType<typeof computePartyStats>;
-  nameA: string; nameB: string;
+  nameA: string; nameB: string; colorA: string; colorB: string;
 }) {
   const data = [
     { axis: 'נשים', A: sA.pctWomen, B: sB.pctWomen },
@@ -217,27 +214,27 @@ function RadarSection({ sA, sB, nameA, nameB }: {
         <RadarChart data={data} cx="50%" cy="50%" outerRadius="75%">
           <PolarGrid stroke="#e5e7eb" />
           <PolarAngleAxis dataKey="axis" tick={{ fontSize: 11, fontFamily: 'Heebo, sans-serif', fill: '#6b7280' }} />
-          <Radar dataKey="A" stroke={COLOR_A} fill={COLOR_A} fillOpacity={0.18} name={nameA} />
-          <Radar dataKey="B" stroke={COLOR_B} fill={COLOR_B} fillOpacity={0.18} name={nameB} />
+          <Radar dataKey="A" stroke={colorA} fill={colorA} fillOpacity={0.18} name={nameA} />
+          <Radar dataKey="B" stroke={colorB} fill={colorB} fillOpacity={0.18} name={nameB} />
           <Tooltip formatter={(v: number, name: string) => [`${v}%`, name]} />
         </RadarChart>
       </ResponsiveContainer>
       <div className="flex justify-center gap-6 mt-1">
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: COLOR_A }} />{nameA}
+          <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: colorA }} />{nameA}
         </span>
         <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
-          <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: COLOR_B }} />{nameB}
+          <span className="w-3 h-1.5 rounded-full inline-block" style={{ backgroundColor: colorB }} />{nameB}
         </span>
       </div>
     </div>
   );
 }
 
-function PeripherySection({ sA, sB, nameA, nameB }: {
+function PeripherySection({ sA, sB, nameA, nameB, colorA, colorB }: {
   sA: ReturnType<typeof computePartyStats>;
   sB: ReturnType<typeof computePartyStats>;
-  nameA: string; nameB: string;
+  nameA: string; nameB: string; colorA: string; colorB: string;
 }) {
   const data = [
     { name: nameA, value: sA.avgPeriphery ?? 0 },
@@ -253,8 +250,8 @@ function PeripherySection({ sA, sB, nameA, nameB }: {
           <YAxis type="category" dataKey="name" tick={{ fontSize: 11, fontFamily: 'Heebo, sans-serif' }} axisLine={false} tickLine={false} width={80} />
           <Tooltip formatter={(v: number) => [v.toFixed(1), 'מדד']} />
           <Bar dataKey="value" radius={[0, 6, 6, 0]}>
-            <Cell fill={COLOR_A} />
-            <Cell fill={COLOR_B} />
+            <Cell fill={colorA} />
+            <Cell fill={colorB} />
           </Bar>
         </BarChart>
       </ResponsiveContainer>
@@ -270,6 +267,8 @@ function CompareStep() {
   const stats = useMemo(() => compareIds.map(id => computePartyStats(id)), [compareIds]);
   const [sA, sB] = stats;
   if (!partyA || !partyB || !sA || !sB) return null;
+  const colorA = partyA.color;
+  const colorB = partyB.color;
 
   return (
     <div className="px-6 py-5 space-y-5">
@@ -280,29 +279,25 @@ function CompareStep() {
           שנה בחירה
         </button>
         <div className="flex gap-4">
-          <span className="font-bold text-sm" style={{ color: COLOR_A }}>{partyA.name}</span>
+          <span className="font-bold text-sm" style={{ color: colorA }}>{partyA.name}</span>
           <span className="text-muted-foreground text-sm">vs.</span>
-          <span className="font-bold text-sm" style={{ color: COLOR_B }}>{partyB.name}</span>
+          <span className="font-bold text-sm" style={{ color: colorB }}>{partyB.name}</span>
         </div>
       </div>
 
       {/* Stat cards grid */}
       <div className="grid grid-cols-2 gap-3">
-        {/* Radar — first, full width, tall */}
-        <RadarSection sA={sA} sB={sB} nameA={partyA.name} nameB={partyB.name} />
+        <RadarSection sA={sA} sB={sB} nameA={partyA.name} nameB={partyB.name} colorA={colorA} colorB={colorB} />
 
-        {/* Stat cards */}
-        <StatCard label="מועמדים ברשימה" a={sA.total} b={sB.total} />
-        <StatCard label="גיל ממוצע" a={sA.avgAge || null} b={sB.avgAge || null} unit=" שנ׳" />
-        <StatCard label="ותק ממוצע" a={sA.avgSeniority || null} b={sB.avgSeniority || null} unit=" שנ׳" />
-        <StatCard label="מועמדים חדשים" a={sA.pctNewcomer} b={sB.pctNewcomer} unit="%" />
+        <StatCard label="מועמדים ברשימה" a={sA.total} b={sB.total} colorA={colorA} colorB={colorB} />
+        <StatCard label="גיל ממוצע" a={sA.avgAge || null} b={sB.avgAge || null} unit=" שנ׳" colorA={colorA} colorB={colorB} />
+        <StatCard label="ותק ממוצע" a={sA.avgSeniority || null} b={sB.avgSeniority || null} unit=" שנ׳" colorA={colorA} colorB={colorB} />
+        <StatCard label="מועמדים חדשים" a={sA.pctNewcomer} b={sB.pctNewcomer} unit="%" colorA={colorA} colorB={colorB} />
 
-        {/* Pie charts */}
-        <PctPieChart label="נשים ברשימה" aVal={sA.pctWomen} bVal={sB.pctWomen} aName={partyA.name} bName={partyB.name} />
-        <PctPieChart label="שירות צבאי" aVal={sA.pctServed} bVal={sB.pctServed} aName={partyA.name} bName={partyB.name} />
+        <PctPieChart label="נשים ברשימה" aVal={sA.pctWomen} bVal={sB.pctWomen} aName={partyA.name} bName={partyB.name} colorA={colorA} colorB={colorB} />
+        <PctPieChart label="שירות צבאי" aVal={sA.pctServed} bVal={sB.pctServed} aName={partyA.name} bName={partyB.name} colorA={colorA} colorB={colorB} />
 
-        {/* Periphery bar */}
-        <PeripherySection sA={sA} sB={sB} nameA={partyA.name} nameB={partyB.name} />
+        <PeripherySection sA={sA} sB={sB} nameA={partyA.name} nameB={partyB.name} colorA={colorA} colorB={colorB} />
       </div>
     </div>
   );
